@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Secure Your Printer from the Internet</title>
+<meta name="description" content="A multilingual guide to closing port 9100 and disabling UPnP to stop internet-exposed printers.">
+<style>
+  :root {
+    --bg: #1a1b26;
+    --bg2: #16161e;
+    --fg: #c0caf5;
+    --dim: #9aa5ce;
+    --purple: #bb9af7;
+    --cyan: #7dcfff;
+    --pink: #ff00ff;
+    --green: #9ece6a;
+    --red: #f7768e;
+    --border: #414868;
+    --hl: #24283b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: radial-gradient(1200px 600px at 80% -10%, #2a2040 0%, var(--bg) 55%), var(--bg);
+    color: var(--fg);
+    font-family: "DejaVu Sans Mono", "Noto Sans Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 3rem 1.4rem 5rem; }
+  header { text-align: center; padding: 1.5rem 0 2rem; }
+  header h1 {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    background: linear-gradient(90deg, var(--purple), var(--pink), var(--cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 800;
+  }
+  header .sub { color: var(--dim); margin-top: .7rem; font-size: .95rem; }
+  .langbar {
+    display: flex; align-items: center; gap: .7rem; flex-wrap: wrap;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+    padding: .7rem .9rem; margin: 1.5rem 0;
+  }
+  .langbar label { color: var(--dim); font-size: .8rem; }
+  select {
+    flex: 1; min-width: 200px; background: var(--hl); color: var(--fg);
+    border: 1px solid var(--border); border-radius: 8px; padding: .45rem .6rem;
+    font-family: inherit; font-size: .9rem; cursor: pointer;
+  }
+  select:focus { outline: 2px solid var(--cyan); }
+  .intro {
+    background: var(--hl); border-left: 4px solid var(--purple);
+    border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 2rem; font-size: .98rem;
+  }
+  ol.steps { list-style: none; counter-reset: step; }
+  ol.steps li {
+    counter-increment: step;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.1rem 1.3rem 1.1rem 3.4rem;
+    margin-bottom: 1rem; position: relative;
+  }
+  ol.steps li::before {
+    content: counter(step);
+    position: absolute; left: 1rem; top: 1.15rem;
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--purple); color: var(--bg); font-weight: 800; font-size: .85rem;
+  }
+  ol.steps h3 { color: var(--cyan); font-size: 1rem; margin-bottom: .35rem; }
+  ol.steps p { color: var(--fg); font-size: .92rem; }
+  .close {
+    margin-top: 2rem; padding: 1.1rem 1.3rem; border-radius: 10px;
+    border: 1px dashed var(--pink); color: var(--dim); font-size: .92rem;
+  }
+  footer {
+    text-align: center; color: var(--dim); font-size: .8rem;
+    margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1.2rem;
+  }
+  footer a { color: var(--cyan); }
+  button {
+    background: var(--hl); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 8px; padding: .4rem .9rem; font-family: inherit; cursor: pointer;
+  }
+  button:hover { border-color: var(--cyan); color: var(--cyan); }
+  @media (max-width: 480px) {
+    ol.steps li { padding-left: 3rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+  </header>
+
+  <div class="langbar">
+    <label for="lang">Language / 语言 / 言語 / язык / язык / limba / dil</label>
+    <select id="lang"></select>
+    <button onclick="window.print()">Print</button>
+  </div>
+
+  <main>
+    <p class="intro" id="intro"></p>
+    <ol class="steps" id="steps"></ol>
+    <p class="close" id="close"></p>
+  </main>
+
+  <footer>
+    minxie.is-a.dev &middot; router-security &middot; a friendly catgirl hacker:3</span>
+  </footer>
+</div>
+
+<script>
+const L = {
+"en": {
+  dir: "ltr",
+  name: "English",
+  t: "How to Secure Your Printer from the Internet",
+  sub: "A short guide to locking down port 9100 and UPnP on your router",
+  intro: "If this page appeared on your printer, your printer is reachable from the public internet through port 9100 (raw TCP printing). Attackers, bots, or curious strangers can send print jobs to it, waste paper and toner, or use it in further attacks. The good news: this is easy to fix.",
+  steps: [
+    {h: "Turn off UPnP on your router", b: "Log in to your router's admin page (usually http://192.168.1.1 or http://192.168.0.1), find \u201cUPnP\u201d and switch it OFF. UPnP lets devices inside your network automatically open ports in your router \u2014 that is exactly how printers end up exposed to the internet."},
+    {h: "Remove port-forwarding rules", b: "While you're in the router admin, look for \u201cPort Forwarding\u201d, \u201cVirtual Server\u201d, or \u201cNAT\u201d. Delete any rule that forwards port 9100 (and 515, 631) to your printer. If your printer is set as a \u201cDMZ\u201d host, remove that too."},
+    {h: "Secure the printer itself", b: "Open the printer's own settings page (find its IP in the router's client list, or print a network status page). Change the admin password, install the latest firmware, and if it offers \u201cIP filtering\u201d, \u201cAccess control\u201d, or \u201cRemote management\u201d, allow only your local network and block access from the WAN."},
+    {h: "Print safely from outside", b: "If you really need to print while away from home, don't forward raw ports. Use the manufacturer's cloud printing, or set up a VPN (WireGuard / OpenVPN) and print only over the VPN."},
+    {h: "Put the printer on its own network", b: "If your router supports it, create a separate network (guest network or VLAN) for IoT devices and connect the printer there. Give it a static IP and make sure no port-forwarding rule points at it."}
+  ],
+  close: "That's it \u2014 five minutes of settings changes and your printer is no longer public property. If you have an IT team, send them this page. \u2014 Friendly catgirl hacker:3"
+},
+"zh-CN": {
+  dir: "ltr",
+  name: "\u7b80\u4f53\u4e2d\u6587",
+  t: "\u5982\u4f55\u4fdd\u62a4\u4f60\u7684\u6253\u5370\u673a\u514d\u906d\u4e92\u8054\u7f51\u653b\u51fb",
+  sub: "\u5173\u4e8e\u5173\u95ed\u8def\u7531\u5668\u4e0a 9100 \u7aef\u53e3\u4e0e UPnP \u7684\u7b80\u77ed\u6307\u5357",
+  intro: "\u5982\u679c\u8fd9\u4e00\u9875\u51fa\u73b0\u5728\u4f60\u7684\u6253\u5370\u673a\u4e0a\uff0c\u8bf4\u660e\u4f60\u7684\u6253\u5370\u673a\u6b63\u901a\u8fc7 9100 \u7aef\u53e3\uff08\u539f\u59cb TCP \u6253\u5370\uff09\u66b4\u9732\u5728\u516c\u7f51\u4e0a\u3002\u653b\u51fb\u8005\u3001\u722c\u866b\u6216\u964c\u751f\u4eba\u53ef\u4ee5\u5411\u5b83\u53d1\u9001\u6253\u5370\u4efb\u52a1\u3001\u6d6a\u8d39\u7eb8\u5f20\u548c\u58a8\u6c34\uff0c\u6216\u5229\u7528\u5b83\u53d1\u8d77\u5176\u4ed6\u653b\u51fb\u3002\u597d\u6d88\u606f\u662f\uff1a\u8fd9\u4e2a\u95ee\u9898\u5f88\u5bb9\u6613\u89e3\u51b3\u3002",
+  steps: [
+    {h: "\u5173\u95ed\u8def\u7531\u5668\u4e0a\u7684 UPnP", b: "\u767b\u5f55\u8def\u7531\u5668\u7ba1\u7406\u9875\u9762\uff08\u901a\u5e38\u662f http://192.168.1.1 \u6216 http://192.168.0.1\uff09\uff0c\u627e\u5230\u201cUPnP\u201d\u5e76\u5173\u95ed\u5b83\u3002UPnP \u5141\u8bb8\u5185\u7f51\u8bbe\u5907\u81ea\u52a8\u5728\u8def\u7531\u5668\u4e0a\u5f00\u653e\u7aef\u53e3\u2014\u2014\u6253\u5370\u673a\u4e4b\u6240\u4ee5\u4f1a\u66b4\u9732\uff0c\u6b63\u662f\u8fd9\u4e2a\u529f\u80fd\u5bfc\u81f4\u7684\u3002"},
+    {h: "\u5220\u9664\u7aef\u53e3\u8f6c\u53d1\u89c4\u5219", b: "\u5728\u8def\u7531\u5668\u7ba1\u7406\u9875\u9762\u91cc\u627e\u5230\u201c\u7aef\u53e3\u8f6c\u53d1\u201d\u201c\u865a\u62df\u670d\u52a1\u5668\u201d\u6216\u201cNAT\u201d\u3002\u5220\u9664\u6240\u6709\u628a 9100 \u7aef\u53e3\uff08\u4ee5\u53ca 515\u3001631\uff09\u8f6c\u53d1\u5230\u6253\u5370\u673a\u7684\u89c4\u5219\u3002\u5982\u679c\u6253\u5370\u673a\u88ab\u8bbe\u7f6e\u4e3a\u201cDMZ\u201d\u4e3b\u673a\uff0c\u4e5f\u8bf7\u4e00\u5e76\u79fb\u9664\u3002"},
+    {h: "\u4fdd\u62a4\u6253\u5370\u673a\u672c\u8eab", b: "\u6253\u5f00\u6253\u5370\u673a\u81ea\u8eab\u7684\u8bbe\u7f6e\u9875\u9762\uff08\u5728\u8def\u7531\u5668\u7684\u5ba2\u6237\u7aef\u5217\u8868\u91cc\u627e\u5230\u5b83\u7684 IP\uff0c\u6216\u6253\u5370\u4e00\u5f20\u7f51\u7edc\u72b6\u6001\u9875\uff09\u3002\u4fee\u6539\u7ba1\u7406\u5458\u5bc6\u7801\uff0c\u5b89\u88c5\u6700\u65b0\u7684\u56fa\u4ef6\uff1b\u5982\u679c\u5b83\u63d0\u4f9b\u201cIP \u8fc7\u6ee4\u201d\u201c\u8bbf\u95ee\u63a7\u5236\u201d\u6216\u201c\u8fdc\u7a0b\u7ba1\u7406\u201d\uff0c\u8bf7\u53ea\u5141\u8bb8\u672c\u5730\u7f51\u7edc\u8bbf\u95ee\uff0c\u5e76\u963b\u6b62\u6765\u81ea WAN \u7684\u8bbf\u95ee\u3002"},
+    {h: "\u5728\u5916\u90e8\u5b89\u5168\u5730\u6253\u5370", b: "\u5982\u679c\u786e\u5b9e\u9700\u8981\u5728\u5bb6\u5916\u6253\u5370\uff0c\u4e0d\u8981\u8f6c\u53d1\u539f\u59cb\u7aef\u53e3\u3002\u8bf7\u4f7f\u7528\u5382\u5546\u7684\u4e91\u6253\u5370\u670d\u52a1\uff0c\u6216\u8bbe\u7f6e VPN\uff08WireGuard / OpenVPN\uff09\uff0c\u53ea\u901a\u8fc7 VPN \u6253\u5370\u3002"},
+    {h: "\u628a\u6253\u5370\u673a\u653e\u5230\u72ec\u7acb\u7f51\u7edc", b: "\u5982\u679c\u8def\u7531\u5668\u652f\u6301\uff0c\u8bf7\u4e3a IoT \u8bbe\u5907\u521b\u5efa\u72ec\u7acb\u7684\u7f51\u7edc\uff08\u8bbf\u5ba2\u7f51\u7edc\u6216 VLAN\uff09\uff0c\u5e76\u628a\u6253\u5370\u673a\u63a5\u5165\u5176\u4e2d\u3002\u7ed9\u5b83\u5206\u914d\u9759\u6001 IP\uff0c\u5e76\u786e\u4fdd\u6ca1\u6709\u4efb\u4f55\u7aef\u53e3\u8f6c\u53d1\u89c4\u5219\u6307\u5411\u5b83\u3002"}
+  ],
+  close: "\u5c31\u8fd9\u6837\u2014\u2014\u82b1\u4e94\u5206\u949f\u4fee\u6539\u8bbe\u7f6e\uff0c\u4f60\u7684\u6253\u5370\u673a\u5c31\u4e0d\u518d\u662f\u516c\u5171\u8d22\u4ea7\u4e86\u3002\u5982\u679c\u6709 IT \u56e2\u961f\uff0c\u8bf7\u628a\u8fd9\u9875\u8f6c\u7ed9\u4ed6\u4eec\u3002\u2014\u2014Friendly catgirl hacker:3"
+},
+"zh-TW": {
+  dir: "ltr",
+  name: "\u7e41\u9ad4\u4e2d\u6587",
+  t: "\u5982\u4f55\u4fdd\u8b77\u4f60\u7684\u5370\u8868\u6a5f\u514d\u53d7\u7db2\u969b\u7db2\u8def\u653b\u64ca",
+  sub: "\u95dc\u65bc\u95dc\u9589\u8def\u7531\u5668\u4e0a 9100 \u9023\u63a5\u57e0\u8207 UPnP \u7684\u7c21\u77ed\u6307\u5357",
+  intro: "\u5982\u679c\u9019\u4e00\u9801\u51fa\u73fe\u5728\u4f60\u7684\u5370\u8868\u6a5f\u4e0a\uff0c\u4ee3\u8868\u4f60\u7684\u5370\u8868\u6a5f\u6b63\u900f\u904e 9100 \u9023\u63a5\u57e0\uff08\u539f\u59cb TCP \u5217\u5370\uff09\u66b4\u9732\u5728\u516c\u7db2\u4e0a\u3002\u653b\u64ca\u8005\u3001\u722c\u866b\u6216\u964c\u751f\u4eba\u53ef\u4ee5\u5411\u5b83\u50b3\u9001\u5217\u5370\u5de5\u4f5c\u3001\u6d6a\u8cbb\u7d19\u5f35\u8207\u58a8\u6c34\uff0c\u6216\u5229\u7528\u5b83\u767c\u52d5\u5176\u4ed6\u653b\u64ca\u3002\u597d\u6d88\u606f\u662f\uff1a\u9019\u500b\u554f\u984c\u5f88\u5bb9\u6613\u89e3\u6c7a\u3002",
+  steps: [
+    {h: "\u95dc\u9589\u8def\u7531\u5668\u4e0a\u7684 UPnP", b: "\u767b\u5165\u8def\u7531\u5668\u7ba1\u7406\u9801\u9762\uff08\u901a\u5e38\u662f http://192.168.1.1 \u6216 http://192.168.0.1\uff09\uff0c\u627e\u5230\u300cUPnP\u300d\u4e26\u95dc\u9589\u5b83\u3002UPnP \u5141\u8a31\u5167\u7db2\u88dd\u7f6e\u81ea\u52d5\u5728\u8def\u7531\u5668\u4e0a\u958b\u555f\u9023\u63a5\u57e0\u2014\u2014\u5370\u8868\u6a5f\u6703\u66b4\u9732\uff0c\u6b63\u662f\u9019\u500b\u529f\u80fd\u9020\u6210\u7684\u3002"},
+    {h: "\u522a\u9664\u9023\u63a5\u57e0\u8f49\u767c\u898f\u5247", b: "\u5728\u8def\u7531\u5668\u7ba1\u7406\u9801\u9762\u4e2d\u5c0b\u627e\u300c\u9023\u63a5\u57e0\u8f49\u767c\u300d\u300c\u865b\u64ec\u4f3a\u670d\u5668\u300d\u6216\u300cNAT\u300d\u3002\u522a\u9664\u6240\u6709\u628a 9100 \u9023\u63a5\u57e0\uff08\u4ee5\u53ca 515\u3001631\uff09\u8f49\u767c\u5230\u5370\u8868\u6a5f\u7684\u898f\u5247\u3002\u5982\u679c\u5370\u8868\u6a5f\u88ab\u8a2d\u70ba\u300cDMZ\u300d\u4e3b\u6a5f\uff0c\u4e5f\u8acb\u4e00\u4f75\u79fb\u9664\u3002"},
+    {h: "\u4fdd\u8b77\u5370\u8868\u6a5f\u672c\u8eab", b: "\u958b\u555f\u5370\u8868\u6a5f\u81ea\u8eab\u7684\u8a2d\u5b9a\u9801\u9762\uff08\u5728\u8def\u7531\u5668\u7684\u5ba2\u6236\u7aef\u6e05\u55ae\u4e2d\u5c0b\u627e\u5b83\u7684 IP\uff0c\u6216\u5217\u5370\u4e00\u5f35\u7db2\u8def\u72c0\u614b\u9801\uff09\u3002\u4fee\u6539\u7ba1\u7406\u54e1\u5bc6\u78bc\uff0c\u5b89\u88dd\u6700\u65b0\u97cc\u9ad4\uff1b\u5982\u679c\u5b83\u63d0\u4f9b\u300cIP \u904e\u6ffe\u300d\u300c\u5b58\u53d6\u63a7\u5236\u300d\u6216\u300c\u9060\u7aef\u7ba1\u7406\u300d\uff0c\u8acb\u53ea\u5141\u8a31\u672c\u6a5f\u7db2\u8def\u5b58\u53d6\uff0c\u4e26\u5c01\u9396\u4f86\u81ea WAN \u7684\u5b58\u53d6\u3002"},
+    {h: "\u5728\u5916\u90e8\u5b89\u5168\u5730\u5217\u5370", b: "\u5982\u679c\u78ba\u5be6\u9700\u8981\u5728\u6236\u5916\u5217\u5370\uff0c\u8acb\u4e0d\u8981\u8f49\u767c\u539f\u59cb\u9023\u63a5\u57e0\u3002\u8acb\u4f7f\u7528\u5320\u5546\u7684\u96f2\u7aef\u5217\u5370\u670d\u52d9\uff0c\u6216\u8a2d\u5b9a VPN\uff08WireGuard / OpenVPN\uff09\uff0c\u53ea\u900f\u904e VPN \u5217\u5370\u3002"},
+    {h: "\u628a\u5370\u8868\u6a5f\u653e\u5230\u7368\u7acb\u7db2\u8def", b: "\u5982\u679c\u8def\u7531\u5668\u652f\u63f4\uff0c\u8acb\u70ba IoT \u88dd\u7f6e\u5efa\u7acb\u7368\u7acb\u7684\u7db2\u8def\uff08\u8a2a\u5ba2\u7db2\u8def\u6216 VLAN\uff09\uff0c\u4e26\u5c07\u5370\u8868\u6a5f\u63a5\u5165\u5176\u4e2d\u3002\u70ba\u5b83\u8a2d\u5b9a\u56fa\u5b9a IP\uff0c\u4e26\u78ba\u4fdd\u6c92\u6709\u4efb\u4f55\u9023\u63a5\u57e0\u8f49\u767c\u898f\u5247\u6307\u5411\u5b83\u3002"}
+  ],
+  close: "\u5c31\u9019\u6a23\u2014\u2014\u82b1\u4e94\u5206\u9418\u4fee\u6539\u8a2d\u5b9a\uff0c\u4f60\u7684\u5370\u8868\u6a5f\u5c31\u4e0d\u518d\u662f\u516c\u5171\u8ca1\u7522\u4e86\u3002\u5982\u679c\u6709 IT \u5718\u968a\uff0c\u8acb\u5c07\u9019\u9801\u8f49\u4ea4\u7d66\u4ed6\u5011\u3002\u2014\u2014Friendly catgirl hacker:3"
+},
+"ja": {
+  dir: "ltr",
+  name: "\u65e5\u672c\u8a9e",
+  t: "\u30d7\u30ea\u30f3\u30bf\u3092\u30a4\u30f3\u30bf\u30fc\u30cd\u30c3\u30c8\u304b\u3089\u5b88\u308b\u65b9\u6cd5",
+  sub: "\u30dd\u30fc\u30c89100\u3068\u30eb\u30fc\u30bf\u30fc\u306eUPnP\u3092\u7121\u52b9\u5316\u3059\u308b\u305f\u3081\u306e\u77ed\u3044\u30ac\u30a4\u30c9",
+  intro: "\u3053\u306e\u30da\u30fc\u30b8\u304c\u30d7\u30ea\u30f3\u30bf\u3067\u5370\u5237\u3055\u308c\u305f\u3068\u3044\u3046\u3053\u3068\u306f\u3001\u30d7\u30ea\u30f3\u30bf\u304c\u30dd\u30fc\u30c89100\uff08RAW TCP\u5370\u5237\uff09\u7d4c\u7531\u3067\u30a4\u30f3\u30bf\u30fc\u30cd\u30c3\u30c8\u306b\u9732\u51fa\u3057\u3066\u3044\u307e\u3059\u3002\u653b\u6483\u8005\u3084\u30dc\u30c3\u30c8\u3001\u7b2c\u4e09\u8005\u304b\u3089\u5370\u5237\u30b8\u30e7\u30d6\u3092\u9001\u3089\u308c\u3001\u7d19\u3084\u30c8\u30ca\u30fc\u3092\u7121\u99c4\u306b\u3055\u308c\u305f\u308a\u3001\u4ed6\u306e\u653b\u6483\u306b\u4f7f\u308f\u308c\u305f\u308a\u3059\u308b\u53ef\u80fd\u6027\u304c\u3042\u308a\u307e\u3059\u3002\u5e78\u3044\u3001\u3053\u308c\u306f\u7c21\u5358\u306b\u76f4\u305b\u307e\u3059\u3002",
+  steps: [
+    {h: "UPnP\u3092\u7121\u52b9\u306b\u3059\u308b", b: "\u30eb\u30fc\u30bf\u30fc\u306e\u7ba1\u7406\u753b\u9762\uff08\u901a\u5e38 http://192.168.1.1 \u307e\u305f\u306f http://192.168.0.1\uff09\u306b\u30ed\u30b0\u30a4\u30f3\u3057\u3001\u300cUPnP\u300d\u3092\u63a2\u3057\u3066\u30aa\u30d5\u306b\u3057\u307e\u3059\u3002UPnP\u306f\u6a5f\u5668\u304c\u30eb\u30fc\u30bf\u30fc\u306e\u30dd\u30fc\u30c8\u3092\u81ea\u52d5\u3067\u958b\u653e\u3059\u308b\u6a5f\u80fd\u3067\u3001\u307e\u3055\u306b\u3053\u308c\u304c\u30d7\u30ea\u30f3\u30bf\u304c\u9732\u51fa\u3057\u3066\u3057\u307e\u3046\u539f\u56e0\u3067\u3059\u3002"},
+    {h: "\u30dd\u30fc\u30c8\u8ee2\u9001\u306e\u30eb\u30fc\u30eb\u3092\u524a\u9664\u3059\u308b", b: "\u30eb\u30fc\u30bf\u30fc\u7ba1\u7406\u753b\u9762\u3067\u300c\u30dd\u30fc\u30c8\u8ee2\u9001\u300d\u300c\u30d0\u30fc\u30c1\u30e3\u30eb\u30b5\u30fc\u30d0\u30fc\u300d\u300cNAT\u300d\u3092\u63a2\u3057\u30019100\uff08\u304a\u3088\u3073515\u3001631\uff09\u3092\u30d7\u30ea\u30f3\u30bf\u306b\u8ee2\u9001\u3059\u308b\u30eb\u30fc\u30eb\u3092\u3059\u3079\u3066\u524a\u9664\u3057\u307e\u3059\u3002\u30d7\u30ea\u30f3\u30bf\u304c\u300cDMZ\u300d\u306b\u8a2d\u5b9a\u3055\u308c\u3066\u3044\u308b\u5834\u5408\u3082\u89e3\u9664\u3057\u307e\u3059\u3002"},
+    {h: "\u30d7\u30ea\u30f3\u30bf\u81ea\u4f53\u3092\u4fdd\u8b77\u3059\u308b", b: "\u30d7\u30ea\u30f3\u30bf\u306e\u8a2d\u5b9a\u753b\u9762\u3092\u958b\u304d\u307e\u3059\uff08\u30eb\u30fc\u30bf\u30fc\u306e\u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u4e00\u89a7\u3067IP\u3092\u78ba\u8a8d\u3059\u308b\u304b\u3001\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u30b9\u30c6\u30fc\u30bf\u30b9\u30da\u30fc\u30b8\u3092\u5370\u5237\uff09\u3002\u7ba1\u7406\u8005\u30d1\u30b9\u30ef\u30fc\u30c9\u3092\u5909\u66f4\u3057\u3001\u6700\u65b0\u306e\u30d5\u30a1\u30fc\u30e0\u30a6\u30a7\u30a2\u3092\u9069\u7528\u3057\u3001\u300cIP\u30d5\u30a3\u30eb\u30bf\u30fc\u300d\u300c\u30a2\u30af\u30bb\u30b9\u5236\u5fa1\u300d\u300c\u30ea\u30e2\u30fc\u30c8\u7ba1\u7406\u300d\u304c\u3042\u308c\u3070\u3001\u30ed\u30fc\u30ab\u30eb\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u306e\u307f\u8a31\u53ef\u3057WAN\u304b\u3089\u306e\u30a2\u30af\u30bb\u30b9\u3092\u7121\u52b9\u306b\u3057\u307e\u3059\u3002"},
+    {h: "\u5916\u90e8\u304b\u3089\u5370\u5237\u3059\u308b\u5834\u5408\u306f\u5b89\u5168\u306a\u65b9\u6cd5\u3092", b: "\u51fa\u5916\u5148\u304b\u3089\u5370\u5237\u3059\u308b\u5fc5\u8981\u304c\u3042\u308b\u306a\u3089\u3001\u751f\u306e\u30dd\u30fc\u30c8\u3092\u8ee2\u9001\u305b\u305a\u3001\u30e1\u30fc\u30ab\u30fc\u306e\u30af\u30e9\u30a6\u30c9\u5370\u5237\u3092\u4f7f\u3046\u304b\u3001VPN\uff08WireGuard/OpenVPN\uff09\u3092\u8a2d\u5b9a\u3057\u3066VPN\u7d4c\u7531\u3067\u306e\u307f\u5370\u5237\u3057\u307e\u3059\u3002"},
+    {h: "\u30d7\u30ea\u30f3\u30bf\u3092\u5c02\u7528\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u306b\u7f6e\u304f", b: "\u30eb\u30fc\u30bf\u30fc\u304c\u5bfe\u5fdc\u3057\u3066\u3044\u308c\u3070\u3001IoT\u6a5f\u5668\u7528\u306e\u5225\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\uff08\u30b2\u30b9\u30c8\u30cd\u30c3\u30c8\u30ef\u30fc\u30af\u3084VLAN\uff09\u3092\u4f5c\u308a\u3001\u30d7\u30ea\u30f3\u30bf\u3092\u305d\u3053\u306b\u63a5\u7d9a\u3057\u307e\u3059\u3002\u56fa\u5b9aIP\u3092\u5272\u308a\u5f53\u3066\u3001\u30dd\u30fc\u30c8\u8ee2\u9001\u304c\u5411\u3044\u3066\u3044\u306a\u3044\u3053\u3068\u3092\u78ba\u8a8d\u3057\u307e\u3059\u3002"}
+  ],
+  close: "\u4ee5\u4e0a\u3067\u3059\u3002\u30085\u5206\u306e\u8a2d\u5b9a\u5909\u66f4\u3067\u3001\u30d7\u30ea\u30f3\u30bf\u306f\u3082\u3046\u8ab0\u3067\u3082\u4f7f\u3048\u308b\u72b6\u614b\u3067\u306f\u3042\u308a\u307e\u305b\u3093\u3002IT\u90e8\u9580\u304c\u3044\u308b\u5834\u5408\u306f\u3053\u306e\u30da\u30fc\u30b8\u3092\u5171\u6709\u3057\u3066\u304f\u3060\u3055\u3044\u3002\u2014\u2014Friendly catgirl hacker:3"
+},
+"ko": {
+  dir: "ltr",
+  name: "\ud55c\uad6d\uc5b4",
+  t: "\uc778\ud130\ub137\uc5d0\uc11c \ud504\ub9b0\ud130\ub97c \ubcf4\ud638\ud558\ub294 \ubc29\ubc95",
+  sub: "\ud3ec\ud2b8 9100\uacfc \ub77c\uc6b0\ud130 UPnP\ub97c \uc7a0\uadf8\ub294 \uac04\ub2e8\ud55c \uac00\uc774\ub4dc",
+  intro: "\uc774 \ud398\uc774\uc9c0\uac00 \ud504\ub9b0\ud130\uc5d0\uc11c \ucd9c\ub825\ub418\uc5c8\ub2e4\uba74, \ud504\ub9b0\ud130\uac00 \ud3ec\ud2b8 9100(RAW TCP \uc778\uc1c4)\uc744 \ud1b5\ud574 \uacf5\uac1c \uc778\ud130\ub137\uc5d0 \ub178\ucd9c\ub418\uc5b4 \uc788\ub2e4\ub294 \ub73b\uc785\ub2c8\ub2e4. \uacf5\uaca9\uc790\ub098 \ubcf4\ud2b8, \ub0ae\uc120 \uc0ac\ub78c\uc774 \uc778\uc1c4 \uc791\uc5c5\uc744 \ubcf4\ub0b4 \uc885\uc774\uc640 \ud1a0\ub108\ub97c \ub0ad\ube44\ud558\uac70\ub098 \ub2e4\ub978 \uacf5\uaca9\uc5d0 \uc545\uc6a9\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. \uc88b\uc740 \uc18c\uc2dd\uc740 \uc26d\uac8c \uace0\uce60 \uc218 \uc788\ub2e4\ub294 \uac83\uc785\ub2c8\ub2e4.",
+  steps: [
+    {h: "UPnP \uaed0\uae30", b: "\ub77c\uc6b0\ud130 \uad00\ub9ac \ud398\uc774\uc9c0(\ubcf4\ud1b5 http://192.168.1.1 \ub610\ub294 http://192.168.0.1)\uc5d0 \ub85c\uadf8\uc778\ud574 'UPnP'\ub97c \ucc3e\uc544 \uaed0\uc138\uc694. UPnP\ub294 \ub124\ud2b8\uc6cc\ud06c \uae30\uae30\uac00 \ub77c\uc6b0\ud130\uc758 \ud3ec\ud2b8\ub97c \uc790\ub3d9\uc73c\ub85c \uc5f4\uac8c \ud558\ub294 \uae30\ub2a5\uc73c\ub85c, \ud504\ub9b0\ud130\uac00 \ub178\ucd9c\ub418\ub294 \ubc14\ub85c \uadf8 \uc6d0\uc778\uc785\ub2c8\ub2e4."},
+    {h: "\ud3ec\ud2b8 \ud3ec\uc6cc\ub529 \uaddc\uce59 \uc81c\uac70", b: "\ub77c\uc6b0\ud130 \uad00\ub9ac \ud398\uc774\uc9c0\uc5d0\uc11c 'Port Forwarding', 'Virtual Server', 'NAT'\ub97c \ucc3e\uc544 \ud3ec\ud2b8 9100(\uadf8\ub9ac\uace0 515, 631)\uc744 \ud504\ub9b0\ud130\ub85c \ubcf4\ub0b4\ub294 \uaddc\uce59\uc744 \ubaa8\ub450 \uc0ad\uc81c\ud558\uc138\uc694. \ud504\ub9b0\ud130\uac00 'DMZ'\uc5d0 \uc788\ub2e4\uba74 \uadf8\uac83\ub3c4 \uc81c\uac70\ud558\uc138\uc694."},
+    {h: "\ud504\ub9b0\ud130 \uc790\uccb4\ub97c \uc7a0\uadf8\uae30", b: "\ud504\ub9b0\ud130 \uc124\uc815 \ud398\uc774\uc9c0\ub97c \uc5ec\uc138\uc694(\ub77c\uc6b0\ud130\uc758 \ud074\ub77c\uc774\uc5b8\ud2b8 \ubaa9\ub85d\uc5d0\uc11c IP\ub97c \ucc3e\uac70\ub098 \ub124\ud2b8\uc6cc\ud06c \uc0c1\ud0dc \ud398\uc774\uc9c0\ub97c \uc778\uc1c4). \uad00\ub9ac\uc790 \ube44\ubc00\ubc88\ud638\ub97c \ubc14\uafb8\uace0 \ucd5c\uc2e0 \ud38c\uc6e8\uc5b4\ub97c \uc124\uce58\ud558\uba70, 'IP \ud544\ud130', '\uc561\uc138\uc2a4 \uc81c\uc5b4', '\uc6d0\uaca9 \uad00\ub9ac' \uae30\ub2a5\uc774 \uc788\uc73c\uba74 \ub85c\uceec \ub124\ud2b8\uc6cc\ud06c\ub9cc \ud5c8\uc6a9\ud558\uace0 WAN\uc5d0\uc11c\uc758 \uc811\uadfc\uc744 \ucc28\ub2e8\ud558\uc138\uc694."},
+    {h: "\uc678\ubd80\uc5d0\uc11c\ub294 \uc548\uc804\ud55c \ubc29\ubc95\uc73c\ub85c \uc778\uc1c4", b: "\uc9d1 \ubc16\uc5d0\uc11c \uc778\uc1c4\ud574\uc57c \ud55c\ub2e4\uba74 \uc6d0\uc2dc \ud3ec\ud2b8\ub97c \uc5f4\uc9c0 \ub9c8\uc138\uc694. \uc81c\uc870\uc0ac\uc758 \ud074\ub77c\uc6b0\ub4dc \uc778\uc1c4\ub97c \uc0ac\uc6a9\ud558\uac70\ub098 VPN(WireGuard/OpenVPN)\uc744 \uc124\uc815\ud558\uace0 VPN\uc744 \ud1b5\ud574\uc11c\ub9cc \uc778\uc1c4\ud558\uc138\uc694."},
+    {h: "\ud504\ub9b0\ud130\ub97c \ubcc4\ub3c4 \ub124\ud2b8\uc6cc\ud06c\uc5d0 \ubc30\uce58", b: "\ub77c\uc6b0\ud130\uac00 \uc9c0\uc6d0\ud55c\ub2e4\uba74 IoT \uae30\uae30\uc6a9\uc73c\ub85c \ubcc4\ub3c4\uc758 \ub124\ud2b8\uc6cc\ud06c(\uac8c\uc2a4\ud2b8 \ub610\ub294 VLAN)\ub97c \ub9cc\ub4e4\uace0 \ud504\ub9b0\ud130\ub97c \uadf8\uacf3\uc5d0 \uc5f0\uacb0\ud558\uc138\uc694. \uace0\uc815 IP\ub97c \uc8fc\uace0 \uc5b4\ub5a4 \ud3ec\ud2b8 \ud3ec\uc6cc\ub529\ub3c4 \ud504\ub9b0\ud130\ub97c \uac00\ub9ac\ud0a4\uc9c0 \uc54a\uac8c \ud558\uc138\uc694."}
+  ],
+  close: "\uc774\uac83\uc73c\ub85c \ub05d\uc785\ub2c8\ub2e4. 5\ubd84\ub9cc \uc124\uc815\uc744 \ubc14\uafb8\uba74 \ud504\ub9b0\ud130\ub294 \ub354 \uc774\uc0c1 \uacf5\uc6a9\uc774 \uc544\ub2d9\ub2c8\ub2e4. IT \ubd80\uc11c\uac00 \uc788\ub2e4\uba74 \uc774 \ud398\uc774\uc9c0\ub97c \uacf5\uc720\ud558\uc138\uc694. \u2014 Friendly catgirl hacker:3"
+},
+"es": {
+  dir: "ltr",
+  name: "Espa\u00f1ol",
+  t: "C\u00f3mo asegurar tu impresora frente a Internet",
+  sub: "Gu\u00eda r\u00e1pida para bloquear el puerto 9100 y el UPnP de tu router",
+  intro: "Si esta p\u00e1gina apareci\u00f3 en tu impresora, tu impresora es accesible desde Internet p\u00fablico a trav\u00e9s del puerto 9100 (impresi\u00f3n TCP). Atacantes, bots o desconocidos pueden enviar trabajos de impresi\u00f3n, gastar papel y tinta, o usarla en otros ataques. La buena noticia: es f\u00e1cil de arreglar.",
+  steps: [
+    {h: "Apaga UPnP", b: "Entra a la p\u00e1gina de administraci\u00f3n de tu router (normalmente http://192.168.1.1 o http://192.168.0.1), busca \u201cUPnP\u201d y desact\u00edvalo. UPnP permite que los dispositivos abran puertos autom\u00e1ticamente en tu router \u2014 as\u00ed es exactamente como las impresoras terminan expuestas."},
+    {h: "Elimina las reglas de redirecci\u00f3n de puertos", b: "En la administraci\u00f3n del router busca \u201cRedirecci\u00f3n de puertos\u201d, \u201cServidor virtual\u201d o \u201cNAT\u201d. Borra cualquier regla que reenv\u00ede el puerto 9100 (y 515, 631) a tu impresora. Si la impresora est\u00e1 en \u201cDMZ\u201d, qu\u00edtala tambi\u00e9n."},
+    {h: "Protege la impresora", b: "Abre la p\u00e1gina de configuraci\u00f3n de la impresora (encuentra su IP en la lista de clientes del router, o imprime una p\u00e1gina de estado de red). Cambia la contrase\u00f1a de administrador, instala el \u00faltimo firmware y, si tiene \u201cFiltrado de IP\u201d, \u201cControl de acceso\u201d o \u201cAdministraci\u00f3n remota\u201d, permite solo tu red local y desactiva el acceso desde la WAN."},
+    {h: "Usa una forma segura de imprimir desde fuera", b: "Si necesitas imprimir desde fuera de casa, no reenv\u00edes puertos. Usa la impresi\u00f3n en la nube del fabricante o configura una VPN (WireGuard/OpenVPN) e imprime solo a trav\u00e9s de la VPN."},
+    {h: "Pon la impresora en su propia red", b: "Si tu router lo permite, crea una red separada (invitados o VLAN) para dispositivos IoT y conecta la impresora ah\u00ed. Ponle una IP fija y aseg\u00farate de que ning\u00fan reenv\u00edo de puertos apunte a ella."}
+  ],
+  close: "Eso es todo. Cinco minutos de cambios y tu impresora ya no es de uso p\u00fablico. Si tienes equipo t\u00e9cnico, p\u00e1sale esta p\u00e1gina. \u2014 Friendly catgirl hacker:3"
+},
+"fr": {
+  dir: "ltr",
+  name: "Fran\u00e7ais",
+  t: "Comment s\u00e9curiser votre imprimante contre Internet",
+  sub: "Guide rapide pour verrouiller le port 9100 et l'UPnP de votre routeur",
+  intro: "Si cette page est apparue sur votre imprimante, c'est qu'elle est accessible depuis Internet public via le port 9100 (impression TCP brute). Des attaquants, des robots ou des inconnus peuvent y envoyer des impressions, gaspiller du papier et de l'encre, ou s'en servir pour d'autres attaques. Bonne nouvelle : c'est facile \u00e0 corriger.",
+  steps: [
+    {h: "D\u00e9sactivez l'UPnP", b: "Connectez-vous \u00e0 l'interface de votre routeur (g\u00e9n\u00e9ralement http://192.168.1.1 ou http://192.168.0.1), trouvez \u201cUPnP\u201d et \u00e9teignez-le. L'UPnP permet aux appareils d'ouvrir des ports automatiquement sur votre routeur \u2014 c'est exactement comme \u00e7a que les imprimantes se retrouvent expos\u00e9es."},
+    {h: "Supprimez les redirections de ports", b: "Dans l'interface, cherchez \u201cRedirection de ports\u201d, \u201cServeur virtuel\u201d ou \u201cNAT\u201d. Supprimez toute r\u00e8gle qui envoie le port 9100 (et 515, 631) vers votre imprimante. Si l'imprimante est dans la zone \u201cDMZ\u201d, retirez-la aussi."},
+    {h: "Prot\u00e9gez l'imprimante elle-m\u00eame", b: "Ouvrez la page de configuration de l'imprimante (trouvez son IP dans la liste des clients du routeur, ou imprimez une page d'\u00e9tat r\u00e9seau). Changez le mot de passe admin, installez le dernier firmware, et si elle a un \u201cFiltrage IP\u201d, un \u201cContr\u00f4le d'acc\u00e8s\u201d ou une \u201cAdministration \u00e0 distance\u201d, n'autorisez que votre r\u00e9seau local et bloquez l'acc\u00e8s depuis le WAN."},
+    {h: "Imprimez depuis l'ext\u00e9rieur de fa\u00e7on s\u00fbre", b: "Si vous devez imprimer depuis l'ext\u00e9rieur, ne redirigez pas de ports. Utilisez l'impression cloud du fabricant, ou installez un VPN (WireGuard/OpenVPN) et imprimez uniquement via le VPN."},
+    {h: "Mettez l'imprimante sur son propre r\u00e9seau", b: "Si votre routeur le permet, cr\u00e9ez un r\u00e9seau s\u00e9par\u00e9 (invit\u00e9s ou VLAN) pour les objets connect\u00e9s et branchez-y l'imprimante. Donnez-lui une IP fixe et assurez-vous qu'aucun port n'est redirig\u00e9 vers elle."}
+  ],
+  close: "Voil\u00e0, c'est tout. Cinq minutes de r\u00e9glages et votre imprimante n'est plus un bien public. Si vous avez une \u00e9quipe technique, envoyez-leur cette page. \u2014 Friendly catgirl hacker:3"
+},
+"de": {
+  dir: "ltr",
+  name: "Deutsch",
+  t: "So sichern Sie Ihren Drucker gegen das Internet",
+  sub: "Kurzanleitung zum Sperren von Port 9100 und UPnP an Ihrem Router",
+  intro: "Wenn diese Seite auf Ihrem Drucker erschienen ist, ist Ihr Drucker \u00fcber Port 9100 (Raw-TCP-Druck) aus dem \u00f6ffentlichen Internet erreichbar. Angreifer, Bots oder Fremde k\u00f6nnen Druckauftr\u00e4ge senden, Papier und Toner verschwenden oder ihn f\u00fcr weitere Angriffe missbrauchen. Gute Nachricht: Das l\u00e4sst sich leicht beheben.",
+  steps: [
+    {h: "UPnP ausschalten", b: "Melden Sie sich in der Router-Administration an (meist http://192.168.1.1 oder http://192.168.0.1), suchen Sie \u201cUPnP\u201d und schalten Sie es aus. UPnP erlaubt Ger\u00e4ten, automatisch Ports im Router zu \u00f6ffnen \u2013 genau so werden Drucker versehentlich exponiert."},
+    {h: "Port-Weiterleitungen entfernen", b: "Suchen Sie in der Router-Administration nach \u201cPortweiterleitung\u201d, \u201cVirtueller Server\u201d oder \u201cNAT\u201d. L\u00f6schen Sie jede Regel, die Port 9100 (und 515, 631) an Ihren Drucker weiterleitet. Steht der Drucker in der \u201cDMZ\u201d, entfernen Sie ihn auch dort."},
+    {h: "Den Drucker selbst absichern", b: "\u00d6ffnen Sie die Einstellungen des Druckers (IP in der Client-Liste des Routers finden oder Netzwerkstatus-Seite drucken). \u00c4ndern Sie das Admin-Passwort, installieren Sie die neueste Firmware, und falls es \u201cIP-Filter\u201d, \u201cZugriffskontrolle\u201d oder \u201cRemote-Verwaltung\u201d gibt, erlauben Sie nur Ihr lokales Netz und blockieren Sie Zugriff von au\u00dfen."},
+    {h: "Sicher von au\u00dfen drucken", b: "Wenn Sie wirklich von unterwegs drucken m\u00fcssen, leiten Sie keine rohen Ports weiter. Nutzen Sie das Cloud-Drucken des Herstellers oder richten Sie ein VPN ein (WireGuard/OpenVPN) und drucken Sie nur \u00fcber das VPN."},
+    {h: "Drucker ins eigene Netz", b: "Wenn Ihr Router es kann, richten Sie ein separates Netz (Gast- oder VLAN) f\u00fcr IoT-Ger\u00e4te ein und schlie\u00dfen Sie den Drucker dort an. Vergeben Sie eine feste IP und stellen Sie sicher, dass keine Weiterleitung auf ihn zeigt."}
+  ],
+  close: "Das war's. F\u00fcnf Minuten Einstellungen und Ihr Drucker ist kein Freiwild mehr. Wenn Sie ein IT-Team haben, schicken Sie ihm diese Seite. \u2014 Friendly catgirl hacker:3"
+},
+"it": {
+  dir: "ltr",
+  name: "Italiano",
+  t: "Come proteggere la stampante da Internet",
+  sub: "Breve guida per bloccare la porta 9100 e l'UPnP del router",
+  intro: "Se questa pagina \u00e8 apparsa sulla tua stampante, significa che la stampante \u00e8 raggiungibile da Internet tramite la porta 9100 (stampa TCP grezza). Attaccanti, bot o estranei possono inviarle lavori di stampa, sprecare carta e toner, o usarla per altri attacchi. Buona notizia: si risolve facilmente.",
+  steps: [
+    {h: "Disattiva l'UPnP", b: "Accedi alla pagina di amministrazione del router (di solito http://192.168.1.1 o http://192.168.0.1), trova \u201cUPnP\u201d e spegnilo. L'UPnP consente ai dispositivi di aprire porte automaticamente sul router: \u00e8 esattamente cos\u00ec che le stampanti finiscono esposte."},
+    {h: "Rimuovi le regole di inoltro porte", b: "Nell'amministrazione del router cerca \u201cInoltro porte\u201d, \u201cServer virtuale\u201d o \u201cNAT\u201d. Elimina qualsiasi regola che inoltri la porta 9100 (e 515, 631) verso la stampante. Se la stampante \u00e8 nella \u201cDMZ\u201d, rimuovila anche da l\u00ec."},
+    {h: "Blocca la stampante stessa", b: "Apri la pagina delle impostazioni della stampante (trova il suo IP nell'elenco clienti del router, oppure stampa una pagina di stato di rete). Cambia la password di amministratore, installa l'ultimo firmware e, se ha \u201cFiltro IP\u201d, \u201cControllo accessi\u201d o \u201cGestione remota\u201d, consenti solo la tua rete locale e disabilita l'accesso dalla WAN."},
+    {h: "Usa un modo sicuro per stampare da fuori", b: "Se ti serve stampare da fuori casa, non inoltrare porte grezze. Usa la stampa cloud del produttore, oppure configura una VPN (WireGuard/OpenVPN) e stampa solo tramite VPN."},
+    {h: "Metti la stampante nella sua rete", b: "Se il router lo supporta, crea una rete separata (ospiti o VLAN) per i dispositivi IoT e collegaci la stampante. Dagli un IP statico e assicurati che nessun inoltro porte punti su di essa."}
+  ],
+  close: "Tutto qui. Cinque minuti di impostazioni e la stampante non \u00e8 pi\u00f9 un bene pubblico. Se hai un reparto IT, inviagli questa pagina. \u2014 Friendly catgirl hacker:3"
+},
+"pt": {
+  dir: "ltr",
+  name: "Portugu\u00eas",
+  t: "Como proteger sua impressora da Internet",
+  sub: "Guia r\u00e1pido para bloquear a porta 9100 e o UPnP do roteador",
+  intro: "Se esta p\u00e1gina apareceu na sua impressora, sua impressora est\u00e1 acess\u00edvel pela Internet p\u00fablica pela porta 9100 (impress\u00e3o TCP bruta). Atacantes, bots ou estranhos podem enviar trabalhos de impress\u00e3o, gastar papel e tinta, ou us\u00e1-la em outros ataques. Boa not\u00edcia: \u00e9 f\u00e1cil de resolver.",
+  steps: [
+    {h: "Desligue o UPnP", b: "Entre na p\u00e1gina de administra\u00e7\u00e3o do roteador (geralmente http://192.168.1.1 ou http://192.168.0.1), encontre \u201cUPnP\u201d e desative. O UPnP permite que dispositivos abram portas automaticamente no roteador \u2014 \u00e9 exatamente assim que impressoras acabam expostas."},
+    {h: "Remova regras de redirecionamento de porta", b: "Na administra\u00e7\u00e3o do roteador, procure \u201cRedirecionamento de portas\u201d, \u201cServidor virtual\u201d ou \u201cNAT\u201d. Apague qualquer regra que envie a porta 9100 (e 515, 631) para a impressora. Se a impressora estiver na \u201cDMZ\u201d, remova-a tamb\u00e9m."},
+    {h: "Proteja a pr\u00f3pria impressora", b: "Abra a p\u00e1gina de configura\u00e7\u00f5es da impressora (descubra o IP na lista de clientes do roteador ou imprima uma p\u00e1gina de status de rede). Mude a senha de administrador, instale o firmware mais recente e, se houver \u201cFiltro de IP\u201d, \u201cControle de acesso\u201d ou \u201cGerenciamento remoto\u201d, permita apenas sua rede local e desative o acesso pela WAN."},
+    {h: "Use uma forma segura de imprimir de fora", b: "Se precisar imprimir fora de casa, n\u00e3o encaminhe portas brutas. Use a impress\u00e3o em nuvem do fabricante ou configure uma VPN (WireGuard/OpenVPN) e imprima apenas pela VPN."},
+    {h: "Coloque a impressora em sua pr\u00f3pria rede", b: "Se o roteador suportar, crie uma rede separada (convidados ou VLAN) para dispositivos IoT e conecte a impressora nela. D\u00ea um IP fixo e garanta que nenhum redirecionamento de porta aponte para ela."}
+  ],
+  close: "\u00c9 isso. Cinco minutos de mudan\u00e7as e sua impressora n\u00e3o \u00e9 mais de uso p\u00fablico. Se houver equipe t\u00e9cnica, envie esta p\u00e1gina. \u2014 Friendly catgirl hacker:3"
+},
+"ru": {
+  dir: "ltr",
+  name: "\u0420\u0443\u0441\u0441\u043a\u0438\u0439",
+  t: "\u041a\u0430\u043a \u0437\u0430\u0449\u0438\u0442\u0438\u0442\u044c \u043f\u0440\u0438\u043d\u0442\u0435\u0440 \u043e\u0442 \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442\u0430",
+  sub: "\u041a\u0440\u0430\u0442\u043a\u043e\u0435 \u0440\u0443\u043a\u043e\u0432\u043e\u0434\u0441\u0442\u0432\u043e \u043f\u043e \u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u043a\u0435 \u043f\u043e\u0440\u0442\u0430 9100 \u0438 UPnP \u043d\u0430 \u0440\u043e\u0443\u0442\u0435\u0440\u0435",
+  intro: "\u0415\u0441\u043b\u0438 \u044d\u0442\u0430 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043f\u043e\u044f\u0432\u0438\u043b\u0430\u0441\u044c \u043d\u0430 \u0432\u0430\u0448\u0435\u043c \u043f\u0440\u0438\u043d\u0442\u0435\u0440\u0435, \u0437\u043d\u0430\u0447\u0438\u0442 \u043f\u0440\u0438\u043d\u0442\u0435\u0440 \u0434\u043e\u0441\u0442\u0443\u043f\u0435\u043d \u0438\u0437 \u043f\u0443\u0431\u043b\u0438\u0447\u043d\u043e\u0433\u043e \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442\u0430 \u0447\u0435\u0440\u0435\u0437 \u043f\u043e\u0440\u0442 9100 (\u0441\u044b\u0440\u0430\u044f TCP-\u043f\u0435\u0447\u0430\u0442\u044c). \u0417\u043b\u043e\u0443\u043c\u044b\u0448\u043b\u0435\u043d\u043d\u0438\u043a\u0438, \u0431\u043e\u0442\u044b \u0438\u043b\u0438 \u043f\u043e\u0441\u0442\u043e\u0440\u043e\u043d\u043d\u0438\u0435 \u043c\u043e\u0433\u0443\u0442 \u043e\u0442\u043f\u0440\u0430\u0432\u043b\u044f\u0442\u044c \u043d\u0430 \u043d\u0435\u0433\u043e \u0437\u0430\u0434\u0430\u043d\u0438\u044f \u043f\u0435\u0447\u0430\u0442\u0438, \u0442\u0440\u0430\u0442\u0438\u0442\u044c \u0431\u0443\u043c\u0430\u0433\u0443 \u0438 \u0442\u043e\u043d\u0435\u0440 \u0438\u043b\u0438 \u0438\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c \u0435\u0433\u043e \u0432 \u0434\u0440\u0443\u0433\u0438\u0445 \u0430\u0442\u0430\u043a\u0430\u0445. \u0425\u043e\u0440\u043e\u0448\u0430\u044f \u043d\u043e\u0432\u043e\u0441\u0442\u044c: \u044d\u0442\u043e \u043b\u0435\u0433\u043a\u043e \u0438\u0441\u043f\u0440\u0430\u0432\u0438\u0442\u044c.",
+  steps: [
+    {h: "\u041e\u0442\u043a\u043b\u044e\u0447\u0438\u0442\u0435 UPnP", b: "\u0417\u0430\u0439\u0434\u0438\u0442\u0435 \u0432 \u043f\u0430\u043d\u0435\u043b\u044c \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u044f \u0440\u043e\u0443\u0442\u0435\u0440\u043e\u043c (\u043e\u0431\u044b\u0447\u043d\u043e http://192.168.1.1 \u0438\u043b\u0438 http://192.168.0.1), \u043d\u0430\u0439\u0434\u0438\u0442\u0435 \u00abUPnP\u00bb \u0438 \u0432\u044b\u043a\u043b\u044e\u0447\u0438\u0442\u0435 \u0435\u0433\u043e. UPnP \u043f\u043e\u0437\u0432\u043e\u043b\u044f\u0435\u0442 \u0443\u0441\u0442\u0440\u043e\u0439\u0441\u0442\u0432\u0430\u043c \u0430\u0432\u0442\u043e\u043c\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438 \u043e\u0442\u043a\u0440\u044b\u0432\u0430\u0442\u044c \u043f\u043e\u0440\u0442\u044b \u043d\u0430 \u0440\u043e\u0443\u0442\u0435\u0440\u0435 \u2014 \u0438\u043c\u0435\u043d\u043d\u043e \u0442\u0430\u043a \u043f\u0440\u0438\u043d\u0442\u0435\u0440\u044b \u0438 \u043e\u043a\u0430\u0437\u044b\u0432\u0430\u044e\u0442\u0441\u044f \u0432 \u0438\u043d\u0442\u0435\u0440\u043d\u0435\u0442\u0435."},
+    {h: "\u0423\u0434\u0430\u043b\u0438\u0442\u0435 \u043f\u0440\u0430\u0432\u0438\u043b\u0430 \u043f\u0440\u043e\u0431\u0440\u043e\u0441\u0430 \u043f\u043e\u0440\u0442\u043e\u0432", b: "\u0412 \u043f\u0430\u043d\u0435\u043b\u0438 \u0440\u043e\u0443\u0442\u0435\u0440\u0430 \u043d\u0430\u0439\u0434\u0438\u0442\u0435 \u00ab\u041f\u0440\u043e\u0431\u0440\u043e\u0441 \u043f\u043e\u0440\u0442\u043e\u0432\u00bb, \u00ab\u0412\u0438\u0440\u0442\u0443\u0430\u043b\u044c\u043d\u044b\u0439 \u0441\u0435\u0440\u0432\u0435\u0440\u00bb \u0438\u043b\u0438 \u00abNAT\u00bb. \u0423\u0434\u0430\u043b\u0438\u0442\u0435 \u0432\u0441\u0435 \u043f\u0440\u0430\u0432\u0438\u043b\u0430, \u043a\u043e\u0442\u043e\u0440\u044b\u0435 \u043f\u0435\u0440\u0435\u043d\u0430\u043f\u0440\u0430\u0432\u043b\u044f\u044e\u0442 \u043f\u043e\u0440\u0442 9100 (\u0430 \u0442\u0430\u043a\u0436\u0435 515, 631) \u043d\u0430 \u043f\u0440\u0438\u043d\u0442\u0435\u0440. \u0415\u0441\u043b\u0438 \u043f\u0440\u0438\u043d\u0442\u0435\u0440 \u043d\u0430\u0445\u043e\u0434\u0438\u0442\u0441\u044f \u0432 \u00abDMZ\u00bb, \u0443\u0431\u0435\u0440\u0438\u0442\u0435 \u0438 \u0435\u0433\u043e."},
+    {h: "\u0417\u0430\u0449\u0438\u0442\u0438\u0442\u0435 \u0441\u0430\u043c \u043f\u0440\u0438\u043d\u0442\u0435\u0440", b: "\u041e\u0442\u043a\u0440\u043e\u0439\u0442\u0435 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0443 \u043d\u0430\u0441\u0442\u0440\u043e\u0435\u043a \u043f\u0440\u0438\u043d\u0442\u0435\u0440\u0430 (\u043d\u0430\u0439\u0434\u0438\u0442\u0435 \u0435\u0433\u043e IP \u0432 \u0441\u043f\u0438\u0441\u043a\u0435 \u043a\u043b\u0438\u0435\u043d\u0442\u043e\u0432 \u0440\u043e\u0443\u0442\u0435\u0440\u0430 \u0438\u043b\u0438 \u0440\u0430\u0441\u043f\u0435\u0447\u0430\u0442\u0430\u0439\u0442\u0435 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0443 \u0441\u043e\u0441\u0442\u043e\u044f\u043d\u0438\u044f \u0441\u0435\u0442\u0438). \u0421\u043c\u0435\u043d\u0438\u0442\u0435 \u043f\u0430\u0440\u043e\u043b\u044c \u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440\u0430, \u0443\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0435 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u044e\u044e \u043f\u0440\u043e\u0448\u0438\u0432\u043a\u0443, \u0430 \u0435\u0441\u043b\u0438 \u0435\u0441\u0442\u044c \u00ab\u0424\u0438\u043b\u044c\u0442\u0440 IP\u00bb, \u00ab\u041a\u043e\u043d\u0442\u0440\u043e\u043b\u044c \u0434\u043e\u0441\u0442\u0443\u043f\u0430\u00bb \u0438\u043b\u0438 \u00ab\u0423\u0434\u0430\u043b\u0451\u043d\u043d\u043e\u0435 \u0443\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435\u00bb, \u0440\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0442\u043e\u043b\u044c\u043a\u043e \u043b\u043e\u043a\u0430\u043b\u044c\u043d\u0443\u044e \u0441\u0435\u0442\u044c \u0438 \u0437\u0430\u043f\u0440\u0435\u0442\u0438\u0442\u0435 \u0434\u043e\u0441\u0442\u0443\u043f \u0438\u0437 WAN."},
+    {h: "\u041f\u0435\u0447\u0430\u0442\u0430\u0439\u0442\u0435 \u0438\u0437\u0432\u043d\u0435 \u0431\u0435\u0437\u043e\u043f\u0430\u0441\u043d\u043e", b: "\u0415\u0441\u043b\u0438 \u043d\u0443\u0436\u043d\u043e \u043f\u0435\u0447\u0430\u0442\u0430\u0442\u044c \u0438\u0437-\u0437\u0430 \u043f\u0440\u0435\u0434\u0435\u043b\u043e\u0432 \u0434\u043e\u043c\u0430, \u043d\u0435 \u043e\u0442\u043a\u0440\u044b\u0432\u0430\u0439\u0442\u0435 \u043f\u043e\u0440\u0442\u044b. \u0418\u0441\u043f\u043e\u043b\u044c\u0437\u0443\u0439\u0442\u0435 \u043e\u0431\u043b\u0430\u0447\u043d\u0443\u044e \u043f\u0435\u0447\u0430\u0442\u044c \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0438\u0442\u0435\u043b\u044f \u0438\u043b\u0438 \u043d\u0430\u0441\u0442\u0440\u043e\u0439\u0442\u0435 VPN (WireGuard/OpenVPN) \u0438 \u043f\u0435\u0447\u0430\u0442\u0430\u0439\u0442\u0435 \u0442\u043e\u043b\u044c\u043a\u043e \u0447\u0435\u0440\u0435\u0437 VPN."},
+    {h: "\u041f\u043e\u043c\u0435\u0441\u0442\u0438\u0442\u0435 \u043f\u0440\u0438\u043d\u0442\u0435\u0440 \u0432 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u0443\u044e \u0441\u0435\u0442\u044c", b: "\u0415\u0441\u043b\u0438 \u0440\u043e\u0443\u0442\u0435\u0440 \u044d\u0442\u043e \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u0438\u0432\u0430\u0435\u0442, \u0441\u043e\u0437\u0434\u0430\u0439\u0442\u0435 \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u0443\u044e \u0441\u0435\u0442\u044c (\u0433\u043e\u0441\u0442\u0435\u0432\u0443\u044e \u0438\u043b\u0438 VLAN) \u0434\u043b\u044f IoT-\u0443\u0441\u0442\u0440\u043e\u0439\u0441\u0442\u0432 \u0438 \u043f\u043e\u0434\u043a\u043b\u044e\u0447\u0438\u0442\u0435 \u043a \u043d\u0435\u0439 \u043f\u0440\u0438\u043d\u0442\u0435\u0440. \u0412\u044b\u0434\u0430\u0439\u0442\u0435 \u0435\u043c\u0443 \u0441\u0442\u0430\u0442\u0438\u0447\u0435\u0441\u043a\u0438\u0439 IP \u0438 \u0443\u0431\u0435\u0434\u0438\u0442\u0435\u0441\u044c, \u0447\u0442\u043e \u043d\u0438\u043a\u0430\u043a\u043e\u0439 \u043f\u0440\u043e\u0431\u0440\u043e\u0441 \u043f\u043e\u0440\u0442\u043e\u0432 \u043d\u0435 \u0443\u043a\u0430\u0437\u044b\u0432\u0430\u0435\u0442 \u043d\u0430 \u043d\u0435\u0433\u043e."}
+  ],
+  close: "\u0412\u043e\u0442 \u0438 \u0432\u0441\u0451. \u041f\u044f\u0442\u044c \u043c\u0438\u043d\u0443\u0442 \u043d\u0430\u0441\u0442\u0440\u043e\u0435\u043a \u2014 \u0438 \u043f\u0440\u0438\u043d\u0442\u0435\u0440 \u0431\u043e\u043b\u044c\u0448\u0435 \u043d\u0435 \u0432 \u043e\u0442\u043a\u0440\u044b\u0442\u043e\u043c \u0434\u043e\u0441\u0442\u0443\u043f\u0435. \u0415\u0441\u043b\u0438 \u0443 \u0432\u0430\u0441 \u0435\u0441\u0442\u044c IT-\u043e\u0442\u0434\u0435\u043b, \u043f\u0435\u0440\u0435\u0434\u0430\u0439\u0442\u0435 \u0438\u043c \u044d\u0442\u0443 \u0441\u0442\u0440\u0430\u043d\u0438\u0446\u0443. \u2014 Friendly catgirl hacker:3"
+},
+"nl": {
+  dir: "ltr",
+  name: "Nederlands",
+  t: "Je printer beveiligen tegen internet",
+  sub: "Korte gids om poort 9100 en UPnP op je router te blokkeren",
+  intro: "Als deze pagina op je printer is verschenen, is je printer bereikbaar vanaf het openbare internet via poort 9100 (raw TCP-printen). Aanvallers, bots of onbekenden kunnen printopdrachten sturen, papier en toner verspillen of de printer misbruiken voor aanvallen. Goed nieuws: dit is makkelijk op te lossen.",
+  steps: [
+    {h: "Zet UPnP uit", b: "Log in op het beheerscherm van je router (meestal http://192.168.1.1 of http://192.168.0.1), zoek \u201cUPnP\u201d en zet het uit. UPnP laat apparaten automatisch poorten openen op je router \u2014 precies zo komen printers bloot te staan."},
+    {h: "Verwijder port-forwarding-regels", b: "Zoek in de router \u201cPoort doorsturen\u201d, \u201cVirtuele server\u201d of \u201cNAT\u201d. Verwijder elke regel die poort 9100 (en 515, 631) naar je printer stuurt. Staat de printer in de \u201cDMZ\u201d? Haal hem daar ook weg."},
+    {h: "Beveilig de printer zelf", b: "Open de instellingen van de printer (vind het IP in de clientlijst van de router of print een netwerkstatuspagina). Verander het adminwachtwoord, installeer de nieuwste firmware en als er \u201cIP-filter\u201d, \u201cToegangsbeheer\u201d of \u201cExtern beheer\u201d is, sta dan alleen je lokale netwerk toe en blokkeer toegang van buitenaf."},
+    {h: "Print veilig van buitenaf", b: "Moet je echt van buiten printen? Stuur dan geen ruwe poorten door. Gebruik cloud-printen van de fabrikant of stel een VPN in (WireGuard/OpenVPN) en print alleen via de VPN."},
+    {h: "Zet de printer in een eigen netwerk", b: "Als je router het ondersteunt, maak dan een apart netwerk (gastnetwerk of VLAN) voor IoT-apparaten en sluit de printer daarop aan. Geef hem een vast IP en zorg dat er geen poort naar hem wordt doorgestuurd."}
+  ],
+  close: "Dat is alles. Vijf minuten instellingen en je printer is geen openbaar bezit meer. Heb je een IT-team? Stuur ze deze pagina. \u2014 Friendly catgirl hacker:3"
+},
+"pl": {
+  dir: "ltr",
+  name: "Polski",
+  t: "Jak zabezpieczy\u0107 drukark\u0119 przed internetem",
+  sub: "Kr\u00f3tki przewodnik: zablokuj port 9100 i UPnP na routerze",
+  intro: "Je\u015bli ta strona wydrukowa\u0142a si\u0119 na Twojej drukarce, oznacza to, \u017ce drukarka jest dost\u0119pna z publicznego internetu przez port 9100 (surowe drukowanie TCP). Atakuj\u0105cy, boty lub obcy mog\u0105 wysy\u0142a\u0107 do niej zadania druku, marnowa\u0107 papier i toner albo wykorzystywa\u0107 j\u0105 w innych atakach. Dobra wiadomo\u015b\u0107: \u0142atwo to naprawi\u0107.",
+  steps: [
+    {h: "Wy\u0142\u0105cz UPnP", b: "Zaloguj si\u0119 do panelu routera (zwykle http://192.168.1.1 lub http://192.168.0.1), znajd\u017a \u201cUPnP\u201d i wy\u0142\u0105cz go. UPnP pozwala urz\u0105dzeniom automatycznie otwiera\u0107 porty na routerze \u2014 dok\u0142adnie tak drukarki trafiaj\u0105 do internetu."},
+    {h: "Usu\u0144 przekierowania port\u00f3w", b: "W panelu routera znajd\u017a \u201cPrzekierowanie port\u00f3w\u201d, \u201cSerwer wirtualny\u201d lub \u201cNAT\u201d. Usu\u0144 wszystkie regu\u0142y przekazuj\u0105ce port 9100 (oraz 515, 631) do drukarki. Je\u015bli drukarka jest w \u201cDMZ\u201d, usu\u0144 j\u0105 r\u00f3wnie\u017c stamt\u0105d."},
+    {h: "Zabezpiecz sam\u0105 drukark\u0119", b: "Otw\u00f3rz panel drukarki (znajd\u017a jej IP na li\u015bcie klient\u00f3w routera lub wydrukuj stron\u0119 statusu sieci). Zmie\u0144 has\u0142o administratora, zainstaluj najnowsze oprogramowanie uk\u0142adowe, a je\u015bli jest \u201cFiltr IP\u201d, \u201cKontrola dost\u0119pu\u201d lub \u201cZdalne zarz\u0105dzanie\u201d, zezw\u00f3l tylko na lokaln\u0105 sie\u0107 i zablokuj dost\u0119p z WAN."},
+    {h: "Drukuj z zewn\u0105trz bezpiecznie", b: "Je\u015bli naprawd\u0119 musisz drukowa\u0107 spoza domu, nie przekierowuj surowych port\u00f3w. U\u017cyj druku w chmurze producenta albo skonfiguruj VPN (WireGuard/OpenVPN) i drukuj tylko przez VPN."},
+    {h: "Umie\u015b\u0107 drukark\u0119 w osobnej sieci", b: "Je\u015bli router to obs\u0142uguje, utw\u00f3rz osobn\u0105 sie\u0107 (go\u015bcinn\u0105 lub VLAN) dla urz\u0105dze\u0144 IoT i pod\u0142\u0105cz do niej drukark\u0119. Nadaj jej sta\u0142e IP i upewnij si\u0119, \u017ce \u017cadne przekierowanie port\u00f3w nie wskazuje na ni\u0105."}
+  ],
+  close: "I tyle. Pi\u0119\u0107 minut zmian w ustawieniach i drukarka nie jest ju\u017c og\u00f3lnodost\u0119pna. Je\u015bli masz dzia\u0142 IT, wy\u015blij im t\u0119 stron\u0119. \u2014 Friendly catgirl hacker:3"
+},
+"tr": {
+  dir: "ltr",
+  name: "T\u00fcrk\u00e7e",
+  t: "Yaz\u0131c\u0131n\u0131z\u0131 \u0130nternetten Nas\u0131l Korursunuz",
+  sub: "9100 numaral\u0131 ba\u011flant\u0131 noktas\u0131n\u0131 ve y\u00f6nlendirici UPnP'yi kilitleme rehberi",
+  intro: "Bu sayfa yaz\u0131c\u0131n\u0131zdan \u00e7\u0131kt\u0131ysa, yaz\u0131c\u0131n\u0131z 9100 numaral\u0131 ba\u011flant\u0131 noktas\u0131ndan (ham TCP yazd\u0131rma) genel internete a\u00e7\u0131k demektir. Sald\u0131rganlar, botlar veya yabanc\u0131lar ona bask\u0131 i\u015fi g\u00f6nderebilir, ka\u011f\u0131t ve toner israf edebilir ya da ba\u015fka sald\u0131r\u0131lar i\u00e7in kullanabilir. \u0130yi haber: bunu d\u00fczeltmek \u00e7ok kolay.",
+  steps: [
+    {h: "UPnP'yi kapat\u0131n", b: "Y\u00f6nlendiricinizin y\u00f6netim sayfas\u0131na girin (genellikle http://192.168.1.1 veya http://192.168.0.1), \u201cUPnP\u201dyi bulun ve kapat\u0131n. UPnP, cihazlar\u0131n y\u00f6nlendiricide otomatik olarak ba\u011flant\u0131 noktas\u0131 a\u00e7mas\u0131na izin verir; yaz\u0131c\u0131lar tam olarak b\u00f6yle internete a\u00e7\u0131k h\u00e2le gelir."},
+    {h: "Ba\u011flant\u0131 noktas\u0131 y\u00f6nlendirme kurallar\u0131n\u0131 kald\u0131r\u0131n", b: "Y\u00f6nlendiricide \u201cPort Y\u00f6nlendirme\u201d, \u201cSanal Sunucu\u201d veya \u201cNAT\u201d b\u00f6l\u00fcm\u00fcn\u00fc bulun. 9100 (ve 515, 631) numaral\u0131 ba\u011flant\u0131 noktalar\u0131n\u0131 yaz\u0131c\u0131n\u0131za y\u00f6nlendiren t\u00fcm kurallar\u0131 silin. Yaz\u0131c\u0131 \u201cDMZ\u201d i\u00e7indeyse onu da oradan \u00e7\u0131kar\u0131n."},
+    {h: "Yaz\u0131c\u0131n\u0131n kendisini koruyun", b: "Yaz\u0131c\u0131n\u0131n ayar sayfas\u0131n\u0131 a\u00e7\u0131n (IP adresini y\u00f6nlendiricinin istemci listesinde bulun veya a\u011f durumu sayfas\u0131 yazd\u0131r\u0131n). Y\u00f6netici parolas\u0131n\u0131 de\u011fi\u015ftirin, en son ayg\u0131t yaz\u0131l\u0131m\u0131n\u0131 kurun ve \u201cIP Filtresi\u201d, \u201cEri\u015fim Kontrol\u00fc\u201d veya \u201cUzaktan Y\u00f6netim\u201d varsa yaln\u0131zca yerel a\u011fa izin verin ve WAN'dan eri\u015fimi kapat\u0131n."},
+    {h: "D\u0131\u015far\u0131dan g\u00fcvenli yazd\u0131rma", b: "Ev d\u0131\u015f\u0131ndan yazd\u0131rman\u0131z gerekiyorsa ham ba\u011flant\u0131 noktalar\u0131 a\u00e7may\u0131n. \u00dcreticinin bulut yazd\u0131rmas\u0131n\u0131 kullan\u0131n ya da bir VPN (WireGuard/OpenVPN) kurun ve yaln\u0131zca VPN \u00fczerinden yazd\u0131r\u0131n."},
+    {h: "Yaz\u0131c\u0131y\u0131 ayr\u0131 bir a\u011fa koyun", b: "Y\u00f6nlendiriciniz destekliyorsa IoT cihazlar\u0131 i\u00e7in ayr\u0131 bir a\u011f (misafir veya VLAN) olu\u015fturun ve yaz\u0131c\u0131y\u0131 oraya ba\u011flay\u0131n. Sabit IP verin ve hi\u00e7bir ba\u011flant\u0131 noktas\u0131 y\u00f6nlendirmesinin yaz\u0131c\u0131y\u0131 g\u00f6stermedi\u011finden emin olun."}
+  ],
+  close: "\u0130\u015fte bu kadar. Be\u015f dakikal\u0131k ayar de\u011fi\u015fikli\u011fiyle yaz\u0131c\u0131n\u0131z art\u0131k herkese a\u00e7\u0131k de\u011fil. Teknik ekibiniz varsa bu sayfay\u0131 onlara g\u00f6nderin. \u2014 Friendly catgirl hacker:3"
+},
+"vi": {
+  dir: "ltr",
+  name: "Ti\u1ebfng Vi\u1ec7t",
+  t: "C\u00e1ch b\u1ea3o v\u1ec7 m\u00e1y in c\u1ee7a b\u1ea1n kh\u1ecfi internet",
+  sub: "H\u01b0\u1edbng d\u1eabn ng\u1eafn \u0111\u1ec3 kh\u00f3a c\u1ed5ng 9100 v\u00e0 UPnP tr\u00ean router",
+  intro: "N\u1ebfu trang n\u00e0y xu\u1ea5t hi\u1ec7n tr\u00ean m\u00e1y in c\u1ee7a b\u1ea1n, m\u00e1y in \u0111ang b\u1ecb l\u1ed9 ra internet c\u00f4ng c\u1ed9ng qua c\u1ed5ng 9100 (in TCP th\u00f4). K\u1ebb t\u1ea5n c\u00f4ng, bot ho\u1eb7c ng\u01b0\u1eddi l\u1ea1 c\u00f3 th\u1ec3 g\u1eedi l\u1ec7nh in, l\u00e0m l\u00e3ng ph\u00ed gi\u1ea5y v\u00e0 m\u1ef1c, ho\u1eb7c l\u1ee3i d\u1ee5ng m\u00e1y in \u0111\u1ec3 t\u1ea5n c\u00f4ng. Tin t\u1ed1t: c\u00e1ch kh\u1eafc ph\u1ee5c r\u1ea5t d\u1ec5.",
+  steps: [
+    {h: "T\u1eaft UPnP", b: "\u0110\u0103ng nh\u1eadp trang qu\u1ea3n tr\u1ecb router (th\u01b0\u1eddng l\u00e0 http://192.168.1.1 ho\u1eb7c http://192.168.0.1), t\u00ecm \u201cUPnP\u201d v\u00e0 t\u1eaft n\u00f3. UPnP cho ph\u00e9p thi\u1ebft b\u1ecb t\u1ef1 \u0111\u1ed9ng m\u1edf c\u1ed5ng tr\u00ean router \u2014 \u0111\u00e2y ch\u00ednh l\u00e0 l\u00fd do m\u00e1y in b\u1ecb l\u1ed9."},
+    {h: "X\u00f3a quy t\u1eafc chuy\u1ec3n c\u1ed5ng", b: "Trong trang qu\u1ea3n tr\u1ecb router, t\u00ecm \u201cChuy\u1ec3n c\u1ed5ng\u201d, \u201cM\u00e1y ch\u1ee7 \u1ea3o\u201d ho\u1eb7c \u201cNAT\u201d. X\u00f3a m\u1ecdi quy t\u1eafc chuy\u1ec3n c\u1ed5ng 9100 (v\u00e0 515, 631) t\u1edbi m\u00e1y in. N\u1ebfu m\u00e1y in n\u1eb1m trong \u201cDMZ\u201d th\u00ec c\u0169ng g\u1ee1 n\u00f3 ra."},
+    {h: "B\u1ea3o v\u1ec7 ch\u00ednh m\u00e1y in", b: "M\u1edf trang c\u00e0i \u0111\u1eb7t m\u00e1y in (t\u00ecm IP trong danh s\u00e1ch thi\u1ebft b\u1ecb c\u1ee7a router, ho\u1eb7c in trang tr\u1ea1ng th\u00e1i m\u1ea1ng). \u0110\u1ed5i m\u1eadt kh\u1ea9u qu\u1ea3n tr\u1ecb, c\u00e0i firmware m\u1edbi nh\u1ea5t, v\u00e0 n\u1ebfu c\u00f3 \u201cL\u1ecdc IP\u201d, \u201cKi\u1ec3m so\u00e1t truy c\u1eadp\u201d ho\u1eb7c \u201cQu\u1ea3n tr\u1ecb t\u1eeb xa\u201d th\u00ec ch\u1ec9 cho ph\u00e9p m\u1ea1ng n\u1ed9i b\u1ed9 v\u00e0 ch\u1eb7n truy c\u1eadp t\u1eeb WAN."},
+    {h: "In t\u1eeb b\u00ean ngo\u00e0i m\u1ed9t c\u00e1ch an to\u00e0n", b: "N\u1ebfu th\u1eadt s\u1ef1 c\u1ea7n in t\u1eeb b\u00ean ngo\u00e0i nh\u00e0, \u0111\u1eebng chuy\u1ec3n c\u1ed5ng th\u00f4. H\u00e3y d\u00f9ng in qua \u0111\u00e1m m\u00e2y c\u1ee7a h\u00e3ng s\u1ea3n xu\u1ea5t, ho\u1eb7c c\u00e0i VPN (WireGuard/OpenVPN) v\u00e0 ch\u1ec9 in qua VPN."},
+    {h: "\u0110\u1eb7t m\u00e1y in v\u00e0o m\u1ea1ng ri\u00eang", b: "N\u1ebfu router h\u1ed7 tr\u1ee3, h\u00e3y t\u1ea1o m\u1ea1ng ri\u00eang (m\u1ea1ng kh\u00e1ch ho\u1eb7c VLAN) cho thi\u1ebft b\u1ecb IoT v\u00e0 k\u1ebft n\u1ed1i m\u00e1y in v\u00e0o \u0111\u00f3. C\u1ea5p IP t\u0129nh v\u00e0 \u0111\u1ea3m b\u1ea3o kh\u00f4ng c\u00f3 quy t\u1eafc chuy\u1ec3n c\u1ed5ng n\u00e0o tr\u1ecf t\u1edbi m\u00e1y in."}
+  ],
+  close: "V\u1eady l\u00e0 xong. Ch\u1ec9 n\u0103m ph\u00fat thay \u0111\u1ed5i c\u00e0i \u0111\u1eb7t l\u00e0 m\u00e1y in kh\u00f4ng c\u00f2n b\u1ecb d\u00f9ng chung c\u00f4ng khai n\u1eefa. N\u1ebfu c\u00f3 b\u1ed9 ph\u1eadn IT, h\u00e3y g\u1eedi trang n\u00e0y cho h\u1ecd. \u2014 Friendly catgirl hacker:3"
+},
+"id": {
+  dir: "ltr",
+  name: "Bahasa Indonesia",
+  t: "Cara Mengamankan Printer Anda dari Internet",
+  sub: "Panduan singkat untuk mengunci port 9100 dan UPnP di router",
+  intro: "Jika halaman ini muncul di printer Anda, berarti printer Anda dapat diakses dari internet publik melalui port 9100 (pencetakan TCP mentah). Penyerang, bot, atau orang asing dapat mengirim pekerjaan cetak, menghabiskan kertas dan tinta, atau memakainya untuk serangan lain. Kabar baiknya: ini mudah diperbaiki.",
+  steps: [
+    {h: "Matikan UPnP", b: "Masuk ke halaman admin router (biasanya http://192.168.1.1 atau http://192.168.0.1), cari \u201cUPnP\u201d lalu matikan. UPnP memungkinkan perangkat membuka port secara otomatis di router \u2014 persis seperti inilah printer menjadi terekspos."},
+    {h: "Hapus aturan penerusan port", b: "Di admin router, cari \u201cPort Forwarding\u201d, \u201cVirtual Server\u201d, atau \u201cNAT\u201d. Hapus semua aturan yang meneruskan port 9100 (dan 515, 631) ke printer Anda. Jika printer ada di \u201cDMZ\u201d, keluarkan juga."},
+    {h: "Amankan printer itu sendiri", b: "Buka halaman pengaturan printer (temukan IP-nya di daftar klien router, atau cetak halaman status jaringan). Ganti kata sandi admin, pasang firmware terbaru, dan jika ada \u201cFilter IP\u201d, \u201cKontrol Akses\u201d, atau \u201cManajemen Jarak Jauh\u201d, izinkan hanya jaringan lokal dan nonaktifkan akses dari WAN."},
+    {h: "Cetak dari luar dengan aman", b: "Jika benar-benar perlu mencetak dari luar rumah, jangan meneruskan port mentah. Gunakan pencetakan cloud dari pabrikan, atau atur VPN (WireGuard/OpenVPN) dan cetak hanya melalui VPN."},
+    {h: "Taruh printer di jaringan sendiri", b: "Jika router mendukung, buat jaringan terpisah (tamu atau VLAN) untuk perangkat IoT dan sambungkan printer ke sana. Beri IP statis dan pastikan tidak ada penerusan port yang mengarah ke printer."}
+  ],
+  close: "Itu saja. Lima menit mengubah pengaturan dan printer Anda tidak lagi bisa dipakai sembarangan. Jika ada tim IT, kirimkan halaman ini kepada mereka. \u2014 Friendly catgirl hacker:3"
+},
+"ar": {
+  dir: "rtl",
+  name: "\u0627\u0644\u0639\u0631\u0628\u064a\u0629",
+  t: "\u0643\u064a\u0641\u064a\u0629 \u062d\u0645\u0627\u064a\u0629 \u0637\u0627\u0628\u0639\u062a\u0643 \u0645\u0646 \u0627\u0644\u0625\u0646\u062a\u0631\u0646\u062a",
+  sub: "\u062f\u0644\u064a\u0644 \u0645\u062e\u062a\u0635\u0631 \u0644\u0625\u063a\u0644\u0627\u0642 \u0627\u0644\u0645\u0646\u0641\u0630 9100 \u0648\u062e\u0627\u0635\u064a\u0629 UPnP \u0641\u064a \u0627\u0644\u0631\u0627\u0648\u062a\u0631",
+  intro: "\u0625\u0630\u0627 \u0638\u0647\u0631\u062a \u0647\u0630\u0647 \u0627\u0644\u0635\u0641\u062d\u0629 \u0639\u0644\u0649 \u0637\u0627\u0628\u0639\u062a\u0643\u060c \u0641\u0647\u0630\u0627 \u064a\u0639\u0646\u064a \u0623\u0646 \u0627\u0644\u0637\u0627\u0628\u0639\u0629 \u0645\u062a\u0627\u062d\u0629 \u0645\u0646 \u0627\u0644\u0625\u0646\u062a\u0631\u0646\u062a \u0627\u0644\u0639\u0627\u0645 \u0639\u0628\u0631 \u0627\u0644\u0645\u0646\u0641\u0630 9100 (\u0627\u0644\u0637\u0628\u0627\u0639\u0629 \u0639\u0628\u0631 TCP). \u064a\u0633\u062a\u0637\u064a\u0639 \u0627\u0644\u0645\u0647\u0627\u062c\u0645\u0648\u0646 \u0623\u0648 \u0627\u0644\u0631\u0648\u0628\u0648\u062a\u0627\u062a \u0623\u0648 \u0627\u0644\u063a\u0631\u0628\u0627\u0621 \u0625\u0631\u0633\u0627\u0644 \u0645\u0647\u0627\u0645 \u0637\u0628\u0627\u0639\u0629 \u0625\u0644\u064a\u0647\u0627\u060c \u0648\u0625\u0647\u062f\u0627\u0631 \u0627\u0644\u0648\u0631\u0642 \u0648\u0627\u0644\u062d\u0628\u0631\u060c \u0623\u0648 \u0627\u0633\u062a\u062e\u062f\u0627\u0645\u0647\u0627 \u0641\u064a \u0647\u062c\u0645\u0627\u062a \u0623\u062e\u0631\u0649. \u0627\u0644\u062e\u0628\u0631 \u0627\u0644\u062c\u064a\u062f: \u0625\u0635\u0644\u0627\u062d \u0647\u0630\u0627 \u0627\u0644\u0623\u0645\u0631 \u0633\u0647\u0644.",
+  steps: [
+    {h: "\u0623\u0637\u0641\u0626 UPnP", b: "\u0633\u062c\u0651\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0625\u0644\u0649 \u0635\u0641\u062d\u0629 \u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0631\u0627\u0648\u062a\u0631 (\u0639\u0627\u062f\u0629 http://192.168.1.1 \u0623\u0648 http://192.168.0.1)\u060c \u0648\u0627\u0628\u062d\u062b \u0639\u0646 'UPnP' \u0648\u0623\u0637\u0641\u0626\u0647. \u062e\u0627\u0635\u064a\u0629 UPnP \u062a\u0633\u0645\u062d \u0644\u0644\u0623\u062c\u0647\u0632\u0629 \u0628\u0641\u062a\u062d \u0627\u0644\u0645\u0646\u0627\u0641\u0630 \u062a\u0644\u0642\u0627\u0626\u064a\u064b\u0627 \u0641\u064a \u0627\u0644\u0631\u0627\u0648\u062a\u0631 \u2014 \u0648\u0647\u0630\u0647 \u0628\u0627\u0644\u0636\u0628\u0637 \u0637\u0631\u064a\u0642\u0629 \u062a\u0639\u0631\u0651\u0636 \u0627\u0644\u0637\u0627\u0628\u0639\u0627\u062a \u0644\u0644\u0625\u0646\u062a\u0631\u0646\u062a."},
+    {h: "\u0627\u062d\u0630\u0641 \u0642\u0648\u0627\u0639\u062f \u062a\u0648\u062c\u064a\u0647 \u0627\u0644\u0645\u0646\u0627\u0641\u0630", b: "\u0641\u064a \u0635\u0641\u062d\u0629 \u0625\u062f\u0627\u0631\u0629 \u0627\u0644\u0631\u0627\u0648\u062a\u0631\u060c \u0627\u0628\u062d\u062b \u0639\u0646 'Port Forwarding' \u0623\u0648 'Virtual Server' \u0623\u0648 'NAT'. \u0627\u062d\u0630\u0641 \u0623\u064a \u0642\u0627\u0639\u062f\u0629 \u062a\u0648\u062c\u0651\u0647 \u0627\u0644\u0645\u0646\u0641\u0630 9100 (\u0648\u0623\u064a\u0636\u064b\u0627 515 \u0648 631) \u0625\u0644\u0649 \u0627\u0644\u0637\u0627\u0628\u0639\u0629. \u0625\u0630\u0627 \u0643\u0627\u0646\u062a \u0627\u0644\u0637\u0627\u0628\u0639\u0629 \u0641\u064a 'DMZ' \u0641\u0623\u062e\u0631\u062c\u0647\u0627 \u0623\u064a\u0636\u064b\u0627."},
+    {h: "\u0623\u0645\u0651\u0646 \u0627\u0644\u0637\u0627\u0628\u0639\u0629 \u0646\u0641\u0633\u0647\u0627", b: "\u0627\u0641\u062a\u062d \u0635\u0641\u062d\u0629 \u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0627\u0644\u0637\u0627\u0628\u0639\u0629 (\u0627\u0628\u062d\u062b \u0639\u0646 \u0639\u0646\u0648\u0627\u0646 IP \u0641\u064a \u0642\u0627\u0626\u0645\u0629 \u0639\u0645\u0644\u0627\u0621 \u0627\u0644\u0631\u0627\u0648\u062a\u0631\u060c \u0623\u0648 \u0627\u0637\u0628\u0639 \u0635\u0641\u062d\u0629 \u062d\u0627\u0644\u0629 \u0627\u0644\u0634\u0628\u0643\u0629). \u063a\u064a\u0651\u0631 \u0643\u0644\u0645\u0629 \u0645\u0631\u0648\u0631 \u0627\u0644\u0645\u062f\u064a\u0631\u060c \u0648\u062b\u0628\u0651\u062a \u0622\u062e\u0631 \u062a\u062d\u062f\u064a\u062b \u0644\u0644\u0628\u0631\u0646\u0627\u0645\u062c \u0627\u0644\u062b\u0627\u0628\u062a\u060c \u0648\u0625\u0630\u0627 \u0643\u0627\u0646\u062a \u0647\u0646\u0627\u0643 \u0645\u064a\u0632\u0629 '\u062a\u0635\u0641\u064a\u0629 IP' \u0623\u0648 '\u0627\u0644\u062a\u062d\u0643\u0645 \u0641\u064a \u0627\u0644\u0648\u0635\u0648\u0644' \u0623\u0648 '\u0627\u0644\u0625\u062f\u0627\u0631\u0629 \u0639\u0646 \u0628\u0639\u062f'\u060c \u0627\u0633\u0645\u062d \u0628\u0627\u0644\u0634\u0628\u0643\u0629 \u0627\u0644\u0645\u062d\u0644\u064a\u0629 \u0641\u0642\u0637 \u0648\u0627\u0645\u0646\u0639 \u0627\u0644\u0648\u0635\u0648\u0644 \u0645\u0646 WAN."},
+    {h: "\u0627\u0637\u0628\u0639 \u0645\u0646 \u0627\u0644\u062e\u0627\u0631\u062c \u0628\u0623\u0645\u0627\u0646", b: "\u0625\u0630\u0627 \u0643\u0646\u062a \u062a\u062d\u062a\u0627\u062c \u0641\u0639\u0644\u064a\u064b\u0627 \u0644\u0644\u0637\u0628\u0627\u0639\u0629 \u0645\u0646 \u062e\u0627\u0631\u062c \u0627\u0644\u0645\u0646\u0632\u0644\u060c \u0641\u0644\u0627 \u062a\u0641\u062a\u062d \u0627\u0644\u0645\u0646\u0627\u0641\u0630 \u0627\u0644\u062e\u0627\u0645. \u0627\u0633\u062a\u062e\u062f\u0645 \u0627\u0644\u0637\u0628\u0627\u0639\u0629 \u0627\u0644\u0633\u062d\u0627\u0628\u064a\u0629 \u0645\u0646 \u0627\u0644\u0634\u0631\u0643\u0629 \u0627\u0644\u0645\u0635\u0646\u0651\u0639\u0629\u060c \u0623\u0648 \u0623\u0639\u062f\u0651 VPN (WireGuard/OpenVPN) \u0648\u0627\u0637\u0628\u0639 \u0639\u0628\u0631 VPN \u0641\u0642\u0637."},
+    {h: "\u0636\u0639 \u0627\u0644\u0637\u0627\u0628\u0639\u0629 \u0641\u064a \u0634\u0628\u0643\u0629 \u0645\u0633\u062a\u0642\u0644\u0629", b: "\u0625\u0630\u0627 \u0643\u0627\u0646 \u0627\u0644\u0631\u0627\u0648\u062a\u0631 \u064a\u062f\u0639\u0645 \u0630\u0644\u0643\u060c \u0623\u0646\u0634\u0626 \u0634\u0628\u0643\u0629 \u0645\u0646\u0641\u0635\u0644\u0629 (\u0634\u0628\u0643\u0629 \u0636\u064a\u0648\u0641 \u0623\u0648 VLAN) \u0644\u0623\u062c\u0647\u0632\u0629 \u0625\u0646\u062a\u0631\u0646\u062a \u0627\u0644\u0623\u0634\u064a\u0627\u0621 \u0648\u0648\u0635\u0651\u0644 \u0627\u0644\u0637\u0627\u0628\u0639\u0629 \u0628\u0647\u0627. \u0623\u0639\u0637\u0647\u0627 \u0639\u0646\u0648\u0627\u0646 IP \u062b\u0627\u0628\u062a\u064b\u0627 \u0648\u062a\u0623\u0643\u0651\u062f \u0645\u0646 \u0639\u062f\u0645 \u0648\u062c\u0648\u062f \u0623\u064a \u062a\u0648\u062c\u064a\u0647 \u0645\u0646\u0627\u0641\u0630 \u064a\u0634\u064a\u0631 \u0625\u0644\u064a\u0647\u0627."}
+  ],
+  close: "\u0647\u0630\u0627 \u0643\u0644 \u0634\u064a\u0621. \u062e\u0645\u0633 \u062f\u0642\u0627\u0626\u0642 \u0645\u0646 \u062a\u063a\u064a\u064a\u0631 \u0627\u0644\u0625\u0639\u062f\u0627\u062f\u0627\u062a \u0648\u0633\u062a\u062a\u0648\u0642\u0641 \u0627\u0644\u0637\u0627\u0628\u0639\u0629 \u0639\u0646 \u0643\u0648\u0646\u0647\u0627 \u0645\u0644\u0643\u064b\u0627 \u0644\u0644\u062c\u0645\u064a\u0639. \u0625\u0630\u0627 \u0643\u0627\u0646 \u0644\u062f\u064a\u0643 \u0641\u0631\u064a\u0642 \u062a\u0642\u0646\u064a \u0641\u0623\u0631\u0633\u0644 \u0644\u0647\u0645 \u0647\u0630\u0647 \u0627\u0644\u0635\u0641\u062d\u0629. \u2014 Friendly catgirl hacker:3"
+},
+"hi": {
+  dir: "ltr",
+  name: "\u0939\u093f\u0928\u094d\u0926\u0940",
+  t: "\u0905\u092a\u0928\u0947 \u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u0915\u094b \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u0938\u0947 \u0915\u0948\u0938\u0947 \u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0915\u0930\u0947\u0902",
+  sub: "\u092a\u094b\u0930\u094d\u091f 9100 \u0914\u0930 \u0930\u093e\u0909\u091f\u0930 \u0915\u0947 UPnP \u0915\u094b \u092c\u0902\u0926 \u0915\u0930\u0928\u0947 \u0915\u0940 \u091b\u094b\u091f\u0940 \u0917\u093e\u0907\u0921",
+  intro: "\u0905\u0917\u0930 \u092f\u0939 \u092a\u0947\u091c \u0906\u092a\u0915\u0947 \u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u092a\u0930 \u091b\u092a\u093e \u0939\u0948, \u0924\u094b \u0906\u092a\u0915\u093e \u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u092a\u094b\u0930\u094d\u091f 9100 (RAW TCP \u092a\u094d\u0930\u093f\u0902\u091f\u093f\u0902\u0917) \u0915\u0947 \u091c\u093c\u0930\u093f\u090f \u0938\u093e\u0930\u094d\u0935\u091c\u0928\u093f\u0915 \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u0938\u0947 \u092a\u0939\u0941\u0902\u091a \u092f\u094b\u0917\u094d\u092f \u0939\u0948\u0964 \u0939\u092e\u0932\u093e\u0935\u0930, \u092c\u0949\u091f \u092f\u093e \u0905\u091c\u0928\u092c\u0940 \u0907\u0938\u092e\u0947\u0902 \u092a\u094d\u0930\u093f\u0902\u091f \u091c\u0949\u092c \u092d\u0947\u091c \u0938\u0915\u0924\u0947 \u0939\u0948\u0902, \u0915\u093e\u0917\u093c\u094b\u091c \u0914\u0930 \u091f\u094b\u0928\u0930 \u092c\u0930\u094d\u092c\u093e\u0926 \u0915\u0930 \u0938\u0915\u0924\u0947 \u0939\u0948\u0902, \u092f\u093e \u0907\u0938\u0947 \u0905\u0928\u094d\u092f \u0939\u092e\u0932\u094b\u0902 \u0915\u0947 \u0932\u093f\u090f \u0907\u0938\u094d\u0924\u0947\u092e\u093e\u0932 \u0915\u0930 \u0938\u0915\u0924\u0947 \u0939\u0948\u0902\u0964 \u0905\u091a\u094d\u091b\u0940 \u0916\u092c\u0930: \u0907\u0938\u0947 \u0920\u0940\u0915 \u0915\u0930\u0928\u093e \u0906\u0938\u093e\u0928 \u0939\u0948\u0964",
+  steps: [
+    {h: "UPnP \u092c\u0902\u0926 \u0915\u0930\u0947\u0902", b: "\u0930\u093e\u0909\u091f\u0930 \u0915\u0947 \u090f\u0921\u092e\u093f\u0928 \u092a\u0947\u091c (\u0906\u092e\u0924\u094c\u0930 \u092a\u0930 http://192.168.1.1 \u092f\u093e http://192.168.0.1) \u092e\u0947\u0902 \u0932\u0949\u0917 \u0907\u0928 \u0915\u0930\u0947\u0902, 'UPnP' \u0916\u094b\u091c\u0947\u0902 \u0914\u0930 \u0907\u0938\u0947 \u092c\u0902\u0926 \u0915\u0930 \u0926\u0947\u0902\u0964 UPnP \u0921\u093f\u0935\u093e\u0907\u0938\u094b\u0902 \u0915\u094b \u0930\u093e\u0909\u091f\u0930 \u092e\u0947\u0902 \u0905\u092a\u0928\u0947 \u0906\u092a \u092a\u094b\u0930\u094d\u091f \u0916\u094b\u0932\u0928\u0947 \u0926\u0947\u0924\u093e \u0939\u0948 \u2014 \u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u0920\u0940\u0915 \u0907\u0938\u0940 \u0924\u0930\u0939 \u0907\u0902\u091f\u0930\u0928\u0947\u091f \u092a\u0930 \u090f\u0915\u094d\u0938\u092a\u094b\u091c\u093c \u0939\u094b \u091c\u093e\u0924\u0947 \u0939\u0948\u0902\u0964"},
+    {h: "\u092a\u094b\u0930\u094d\u091f \u092b\u0949\u0930\u094d\u0935\u0930\u094d\u0921\u093f\u0902\u0917 \u0915\u0947 \u0928\u093f\u092f\u092e \u0939\u091f\u093e\u090f\u0901", b: "\u0930\u093e\u0909\u091f\u0930 \u090f\u0921\u092e\u093f\u0928 \u092e\u0947\u0902 'Port Forwarding', 'Virtual Server' \u092f\u093e 'NAT' \u0916\u094b\u091c\u0947\u0902\u0964 \u092a\u094b\u0930\u094d\u091f 9100 (\u0914\u0930 515, 631) \u0915\u094b \u0905\u092a\u0928\u0947 \u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u092a\u0930 \u092d\u0947\u091c\u0928\u0947 \u0935\u093e\u0932\u0947 \u0938\u092d\u0940 \u0928\u093f\u092f\u092e \u0939\u091f\u093e \u0926\u0947\u0902\u0964 \u0905\u0917\u0930 \u092a\u094d\u0930\u093f\u0902\u091f\u0930 'DMZ' \u092e\u0947\u0902 \u0939\u0948 \u0924\u094b \u0909\u0938\u0947 \u092d\u0940 \u0935\u0939\u093e\u0901 \u0938\u0947 \u0928\u093f\u0915\u093e\u0932\u0947\u0902\u0964"},
+    {h: "\u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u0915\u094b \u0916\u0941\u0926 \u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0915\u0930\u0947\u0902", b: "\u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u0915\u093e \u0938\u0947\u091f\u093f\u0902\u0917 \u092a\u0947\u091c \u0916\u094b\u0932\u0947\u0902 (\u0930\u093e\u0909\u091f\u0930 \u0915\u0940 \u0915\u094d\u0932\u093e\u0907\u0902\u091f \u0938\u0942\u091a\u0940 \u092e\u0947\u0902 \u0907\u0938\u0915\u093e IP \u0916\u094b\u091c\u0947\u0902, \u092f\u093e \u0928\u0947\u091f\u0935\u0930\u094d\u0915 \u0938\u094d\u091f\u0947\u091f\u0938 \u092a\u0947\u091c \u092a\u094d\u0930\u093f\u0902\u091f \u0915\u0930\u0947\u0902)\u0964 \u090f\u0921\u092e\u093f\u0928 \u092a\u093e\u0938\u0935\u0930\u094d\u0921 \u092c\u0926\u0932\u0947\u0902, \u0928\u0935\u0940\u0928\u0924\u092e \u092b\u093c\u0930\u094d\u092e\u0935\u0947\u092f\u0930 \u0907\u0902\u0938\u094d\u091f\u0949\u0932 \u0915\u0930\u0947\u0902, \u0914\u0930 \u0905\u0917\u0930 'IP \u092b\u093c\u093f\u0932\u094d\u091f\u0930', '\u090f\u0915\u094d\u0938\u0947\u0938 \u0915\u0902\u091f\u094d\u0930\u094b\u0932' \u092f\u093e '\u0930\u093f\u092e\u094b\u091f \u092e\u0948\u0928\u0947\u091c\u092e\u0947\u0902\u091f' \u0939\u0948 \u0924\u094b \u0915\u0947\u0935\u0932 \u0905\u092a\u0928\u0947 \u0932\u094b\u0915\u0932 \u0928\u0947\u091f\u0935\u0930\u094d\u0915 \u0915\u094b \u0905\u0928\u0941\u092e\u0924\u093f \u0926\u0947\u0902 \u0914\u0930 WAN \u0938\u0947 \u092a\u0939\u0941\u0902\u091a \u092c\u0902\u0926 \u0915\u0930\u0947\u0902\u0964"},
+    {h: "\u092c\u093e\u0939\u0930 \u0938\u0947 \u0938\u0941\u0930\u0915\u094d\u0937\u093f\u0924 \u0924\u0930\u0940\u0915\u0947 \u0938\u0947 \u092a\u094d\u0930\u093f\u0902\u091f \u0915\u0930\u0947\u0902", b: "\u0905\u0917\u0930 \u0906\u092a\u0915\u094b \u0918\u0930 \u0938\u0947 \u092c\u093e\u0939\u0930 \u092a\u094d\u0930\u093f\u0902\u091f \u0915\u0930\u0928\u093e \u0939\u0940 \u0939\u0948, \u0924\u094b \u0915\u091a\u094d\u091a\u0947 \u092a\u094b\u0930\u094d\u091f \u0906\u0917\u0947 \u0928 \u092d\u0947\u091c\u0947\u0902\u0964 \u0928\u093f\u0930\u094d\u092e\u093e\u0924\u093e \u0915\u0940 \u0915\u094d\u0932\u093e\u0909\u0921 \u092a\u094d\u0930\u093f\u0902\u091f\u093f\u0902\u0917 \u0907\u0938\u094d\u0924\u0947\u092e\u093e\u0932 \u0915\u0930\u0947\u0902, \u092f\u093e VPN (WireGuard/OpenVPN) \u0938\u0947\u091f \u0915\u0930\u0947\u0902 \u0914\u0930 \u0915\u0947\u0935\u0932 VPN \u0915\u0947 \u091c\u093c\u0930\u093f\u090f \u092a\u094d\u0930\u093f\u0902\u091f \u0915\u0930\u0947\u0902\u0964"},
+    {h: "\u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u0915\u094b \u0905\u0932\u0917 \u0928\u0947\u091f\u0935\u0930\u094d\u0915 \u092a\u0930 \u0930\u0916\u0947\u0902", b: "\u0905\u0917\u0930 \u0930\u093e\u0909\u091f\u0930 \u0938\u092e\u0930\u094d\u0925\u0928 \u0915\u0930\u0924\u093e \u0939\u0948, \u0924\u094b IoT \u0921\u093f\u0935\u093e\u0907\u0938\u094b\u0902 \u0915\u0947 \u0932\u093f\u090f \u0905\u0932\u0917 \u0928\u0947\u091f\u0935\u0930\u094d\u0915 (\u0917\u0947\u0938\u094d\u091f \u092f\u093e VLAN) \u092c\u0928\u093e\u090f\u0901 \u0914\u0930 \u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u0915\u094b \u0935\u0939\u093e\u0901 \u0915\u0928\u0947\u0915\u094d\u091f \u0915\u0930\u0947\u0902\u0964 \u0909\u0938\u0947 \u0938\u094d\u0925\u093f\u0930 IP \u0926\u0947\u0902 \u0914\u0930 \u0938\u0941\u0928\u093f\u0936\u094d\u091a\u093f\u0924 \u0915\u0930\u0947\u0902 \u0915\u093f \u0915\u094b\u0908 \u092a\u094b\u0930\u094d\u091f \u092b\u0949\u0930\u094d\u0935\u0930\u094d\u0921\u093f\u0902\u0917 \u0909\u0938\u0915\u0940 \u0913\u0930 \u0907\u0936\u093e\u0930\u093e \u0928 \u0915\u0930\u0947\u0964"}
+  ],
+  close: "\u092c\u0938 \u0907\u0924\u0928\u093e \u0939\u0940\u0964 \u092a\u093e\u0901\u091a \u092e\u093f\u0928\u091f \u0915\u0940 \u0938\u0947\u091f\u093f\u0902\u0917\u094d\u0938 \u092c\u0926\u0932\u0928\u0947 \u0915\u0947 \u092c\u093e\u0926 \u0906\u092a\u0915\u093e \u092a\u094d\u0930\u093f\u0902\u091f\u0930 \u0905\u092c \u0906\u092e \u0907\u0938\u094d\u0924\u0947\u092e\u093e\u0932 \u0915\u0940 \u091a\u0940\u091c\u093c \u0928\u0939\u0940\u0902 \u0930\u0939\u0947\u0917\u093e\u0964 \u0905\u0917\u0930 \u0906\u092a\u0915\u0947 \u092a\u093e\u0938 IT \u091f\u0940\u092e \u0939\u0948 \u0924\u094b \u0909\u0928\u094d\u0939\u0947\u0902 \u092f\u0939 \u092a\u0947\u091c \u092d\u0947\u091c\u0947\u0902\u0964 \u2014 Friendly catgirl hacker:3"
+}
+};
+
+const ORDER = ["en", "zh-CN", "zh-TW", "ja", "ko", "es", "fr", "de", "it", "pt", "ru", "nl", "pl", "tr", "vi", "id", "ar", "hi"];
+const $ = (id) => document.getElementById(id);
+const el = { title: $("title"), sub: $("sub"), intro: $("intro"), steps: $("steps"), close: $("close"), lang: $("lang") };
+
+function render(lang) {
+  const d = L[lang];
+  if (!d) return;
+  document.documentElement.lang = lang;
+  document.documentElement.dir = d.dir;
+  document.title = d.t;
+  el.title.textContent = d.t;
+  el.sub.textContent = d.sub;
+  el.intro.textContent = d.intro;
+  el.steps.innerHTML = "";
+  d.steps.forEach((s) => {
+    const li = document.createElement("li");
+    const h = document.createElement("h3");
+    h.textContent = s.h;
+    const p = document.createElement("p");
+    p.textContent = s.b;
+    li.appendChild(h);
+    li.appendChild(p);
+    el.steps.appendChild(li);
+  });
+  el.close.textContent = d.close;
+  try { localStorage.setItem("printer-lang", lang); } catch (e) {}
+}
+
+// build the selector
+ORDER.forEach((key) => {
+  const opt = document.createElement("option");
+  opt.value = key;
+  opt.textContent = L[key].name;
+  el.lang.appendChild(opt);
+});
+
+// pick an initial language
+let initial = null;
+try { initial = localStorage.getItem("printer-lang"); } catch (e) {}
+if (!initial && navigator.language) {
+  const match = ORDER.find((k) => navigator.language.toLowerCase().startsWith(k.toLowerCase()));
+  initial = match || "en";
+}
+el.lang.value = initial || "en";
+el.lang.addEventListener("change", () => render(el.lang.value));
+render(el.lang.value);
+</script>
+</body>
+</html>
